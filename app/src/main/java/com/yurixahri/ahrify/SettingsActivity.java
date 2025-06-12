@@ -39,6 +39,10 @@ public class SettingsActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.settings_activity);
 
+        Intent intent = new Intent(this, Mediaplayer.class);
+        startForegroundService(intent);
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+
         prefs = getSharedPreferences("Settings", MODE_PRIVATE);
         updateBackgroundOnStart();
 
@@ -47,12 +51,7 @@ public class SettingsActivity extends AppCompatActivity {
         back_button = findViewById(R.id.back_button);
         clear_background = findViewById(R.id.clear_background);
 
-        volume_control.setProgress(prefs.getInt("volume", 100));
-        mediaplayer.player.setVolume(prefs.getInt("volume", 100) / 100f);
 
-        Intent intent = new Intent(this, Mediaplayer.class);
-        startForegroundService(intent);
-        bindService(intent, connection, Context.BIND_AUTO_CREATE);
 
         back_button.setOnClickListener(v -> endActivity());
         set_background.setOnClickListener(v -> setBackground());
@@ -122,7 +121,8 @@ public class SettingsActivity extends AppCompatActivity {
             mediaplayer = binder.getService();
             isBound = true;
 
-
+            volume_control.setProgress(prefs.getInt("volume", 100));
+            mediaplayer.player.setVolume(prefs.getInt("volume", 100) / 100f);
 
         }
         @Override

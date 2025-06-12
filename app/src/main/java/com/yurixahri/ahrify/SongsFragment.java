@@ -120,12 +120,13 @@ public class SongsFragment extends Fragment {
                     for (int i=(songs.currentPage-1)*songs.ITEMS_PER_PAGE; i < songs.songs.length(); i++){
                         try {
                             JSONObject item = songs.songs.getJSONObject(i);
+                            int index = i;
                             String text = !item.getString("title").isEmpty() ? item.getString("title") : item.getString("file_url");
                             String cover = !item.getString("cover64").isEmpty() ? item.getString("cover64") :item.getString("cover");
                             Log.d("item", "name: "+text);
                             Log.d("item", "cover: "+cover);
                             if (cover.isEmpty()){
-                                song_list.add(new defaultListItem(text, R.drawable.file_present_aliceblue, null));
+                                song_list.add(new defaultListItem(text, R.drawable.file_present_aliceblue, null, index));
                             }else{
                                 if (item.getString("cover").startsWith("http://") || item.getString("cover").startsWith("https://")){
 
@@ -138,10 +139,9 @@ public class SongsFragment extends Fragment {
                                                 public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                                                     Bitmap resizedBitmap = BitmapCompressor.resizeKeepRatio(resource, 500, 500);
                                                     Bitmap compressedBitmap = BitmapCompressor.compress(resizedBitmap, BitmapCompressor.Format.JPEG, 50);
-                                                    song_list.add(new defaultListItem(text, R.drawable.file_present_aliceblue, compressedBitmap));
+                                                    song_list.add(new defaultListItem(text, R.drawable.file_present_aliceblue, compressedBitmap, index));
                                                     adapter.notifyDataSetChanged();
                                                 }
-
                                                 @Override
                                                 public void onLoadCleared(@Nullable Drawable placeholder) {
                                                 }
@@ -152,7 +152,8 @@ public class SongsFragment extends Fragment {
                                     Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0,decodedString.length);
                                     Bitmap resizedBitmap = BitmapCompressor.resizeKeepRatio(decodedByte, 500, 500);
                                     Bitmap compressedBitmap = BitmapCompressor.compress(resizedBitmap, BitmapCompressor.Format.JPEG, 50);
-                                    song_list.add(new defaultListItem(text, R.drawable.file_present_aliceblue, compressedBitmap));
+                                    song_list.add(new defaultListItem(text, R.drawable.file_present_aliceblue, compressedBitmap, index));
+                                    adapter.notifyDataSetChanged();
                                 }
                             }
                             //Log.d("item", item.getString("cover"));
@@ -172,15 +173,17 @@ public class SongsFragment extends Fragment {
                                     JSONArray array = new JSONArray();
                                     JSONObject object = new JSONObject();
 
-                                    object.put("file_name", songs.songs.getJSONObject(position).getString("file_url"));
-                                    object.put("song_name", songs.songs.getJSONObject(position).getString("title"));
-                                    object.put("folder", songs.songs.getJSONObject(position).getString("folder_name"));
+                                    object.put("file_name", songs.songs.getJSONObject(item.index).getString("file_url"));
+                                    object.put("song_name", songs.songs.getJSONObject(item.index).getString("title"));
+                                    object.put("folder", songs.songs.getJSONObject(item.index).getString("folder_name"));
                                     object.put("cover", item.cover);
 
                                     array.put(object);
                                     mediaplayer.playlist = array;
                                     mediaplayer.playSong();
                                     mainIterface.goToSongControlActivity();
+
+
                                 } catch (JSONException e) {
                                     throw new RuntimeException(e);
                                 }

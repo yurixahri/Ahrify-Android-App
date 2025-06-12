@@ -12,12 +12,7 @@
     tools:context=".MainActivity"
 
     >
-    <ImageView
-        android:id="@+id/bgImage"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:src="@drawable/bg" />
+    <include layout="@layout/background" />
 
     <LinearLayout
         android:layout_width="match_parent"

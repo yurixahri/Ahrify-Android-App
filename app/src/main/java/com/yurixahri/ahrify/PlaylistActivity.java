@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
@@ -26,6 +27,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.yurixahri.ahrify.adapters.DefaultListView;
 import com.yurixahri.ahrify.models.defaultListItem;
 import com.yurixahri.ahrify.notSingleton.Mediaplayer;
+import com.yurixahri.ahrify.utils.BitmapCompressor;
 import com.yurixahri.ahrify.utils.CustomVolley;
 import com.google.android.exoplayer2.Player;
 
@@ -44,6 +46,7 @@ public class PlaylistActivity extends AppCompatActivity {
     CustomVolley volley;
 
     DefaultListView adapter;
+    SharedPreferences prefs;
 
     private final Player.Listener playerListener = new Player.Listener() {
 
@@ -64,6 +67,9 @@ public class PlaylistActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.playlist_activity);
+
+        prefs = getSharedPreferences("Settings", MODE_PRIVATE);
+        updateBackgroundOnStart();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             getWindow().setNavigationBarColor(Color.BLACK);
@@ -175,6 +181,14 @@ public class PlaylistActivity extends AppCompatActivity {
             });
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void updateBackgroundOnStart(){
+        String base64 = prefs.getString("background", "");
+        if (!base64.isEmpty()) {
+            ImageView background = findViewById(R.id.background);
+            background.setImageBitmap(BitmapCompressor.base64ToBitmap(base64));
         }
     }
 
