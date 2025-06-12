@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="aliceblue">#F0F8FF</color>
+    <color name="aliceblue_10">#1AF0F8FF</color>
+    <color name="aliceblue_30">#4DF0F8FF</color>
+    <color name="aliceblue_50">#80F0F8FF</color>
+    <color name="transparent">#00000000</color>
+    <color name="sapphire_blue">#4875B1</color>
+
+    <color name="primary">#6200EE</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="secondary">#03DAC5</color>
+    <color name="on_secondary">#000000</color>
+    <color name="background">#FFFFFF</color>
+    <color name="on_background">#000000</color>
+</resources>

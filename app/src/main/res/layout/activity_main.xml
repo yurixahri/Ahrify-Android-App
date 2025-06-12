@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows='false'
+
+    tools:context=".MainActivity"
+
+    >
+    <include layout="@layout/background" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#CC000000"
+
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/mode_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:padding="10dp"
+                        android:text="Folders"
+                        android:textColor="@color/aliceblue"
+                        android:textSize="20dp" />
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <ImageButton
+                            android:id="@+id/search_button"
+                            android:layout_width="50dp"
+                            android:layout_height="match_parent"
+
+
+                            android:layout_marginEnd="0dp"
+                            android:layout_toStartOf="@+id/settings_button"
+                            android:background="#00000000"
+                            android:padding="0dp"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/search_aliceblue" />
+                        <ImageButton
+                            android:id="@+id/settings_button"
+                            android:layout_width="50dp"
+                            android:layout_height="match_parent"
+
+                            android:layout_alignParentRight="true"
+                            android:background="#00000000"
+                            android:padding="0dp"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/baseline_settings" />
+                    </RelativeLayout>
+                </LinearLayout>
+
+
+
+                <!--            <com.google.android.material.bottomnavigation.BottomNavigationView-->
+
+                <!--                android:layout_width="match_parent"-->
+                <!--                android:layout_height="50dp"-->
+                <!--                android:background="#00000000"-->
+                <!--                android:enabled="false"-->
+                <!--                app:itemActiveIndicatorStyle="@android:color/transparent"-->
+                <!--                app:itemBackground="@drawable/nav_item_underline"-->
+                <!--                app:itemIconTint="@color/color_nav"-->
+                <!--                app:labelVisibilityMode="unlabeled"-->
+                <!--                app:menu="@menu/nav_bar_mode" />-->
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+
+                    <nl.joery.animatedbottombar.AnimatedBottomBar
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        app:abb_indicatorAppearance="invisible"
+                        app:abb_selectedTabType="text"
+                        app:abb_tabColor="@color/aliceblue_30"
+
+                        app:abb_tabs="@menu/nav_bar_mode" />
+
+                    <nl.joery.animatedbottombar.AnimatedBottomBar
+                        android:id="@+id/top_navigation"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:elevation="10dp"
+                        app:abb_animationDuration="100"
+                        app:abb_indicatorAppearance="round"
+                        app:abb_indicatorColor="@color/aliceblue"
+                        app:abb_indicatorHeight="2dp"
+                        app:abb_indicatorLocation="bottom"
+                        app:abb_indicatorMargin="20dp"
+                        app:abb_selectedIndex="0"
+                        app:abb_selectedTabType="icon"
+                        app:abb_tabAnimation="fade"
+                        app:abb_tabAnimationSelected="fade"
+                        app:abb_tabColorSelected="@color/aliceblue"
+                        app:abb_tabs="@menu/nav_bar_mode"
+                        app:abb_textSize="0dp" />
+                </FrameLayout>
+
+            </LinearLayout>
+
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/main_view_pager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#B3000000"
+                />
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#CC000000">
+            <SeekBar
+                android:id="@+id/seekBar"
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:progressBackgroundTint="@color/aliceblue_50"
+                android:progressTint="@color/aliceblue"
+                android:thumb="@color/transparent"
+                android:thumbTint="@color/transparent"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:gravity="top"
+                />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#CC000000">
+
+
+
+            <LinearLayout
+                android:id="@+id/bottom_panel"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/imageView"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:layout_margin="10dp"
+                    android:src="@drawable/icon1"
+                    android:scaleType="centerCrop"
+                    app:shapeAppearanceOverlay="@style/circleImageView" />
+
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="0dp"
+                        android:layout_toStartOf="@+id/linearLayout"
+                        android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/song_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"
+                            android:ellipsize="marquee"
+                            android:marqueeRepeatLimit="marquee_forever"
+                            android:singleLine="true"
+                            android:scrollHorizontally="true"
+                            android:focusable="true"
+                            android:focusableInTouchMode="true"
+                            android:freezesText="true"
+                            android:textColor="@color/aliceblue"
+                            android:gravity="center_vertical"
+                            />
+                        <TextView
+                            android:id="@+id/afhqkhj"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/linearLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerInParent="true"
+                        android:layout_marginHorizontal="10dp"
+                        android:orientation="horizontal">
+
+                        <ImageButton
+                            android:id="@+id/previous_song"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:background="#00000000"
+                            android:padding="0dp"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/skip_previous" />
+
+                        <ImageButton
+                            android:id="@+id/play_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:background="#00000000"
+                            android:padding="0dp"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/baseline_play_arrow_24" />
+
+                        <ImageButton
+                            android:id="@+id/next_song"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:background="#00000000"
+                            android:padding="0dp"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/skip_next" />
+                    </LinearLayout>
+                </RelativeLayout>
+
+
+            </LinearLayout>
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</FrameLayout>

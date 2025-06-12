@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows='false'
+
+    tools:context=".MainActivity"
+
+    >
+    <include layout="@layout/background" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#CC000000"
+
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:orientation="horizontal">
+
+                    <ImageButton
+                        android:id="@+id/back_button"
+                        android:layout_width="50dp"
+                        android:layout_height="match_parent"
+
+                        android:layout_alignParentRight="true"
+                        android:background="#00000000"
+                        android:padding="0dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/arrow_back" />
+                    <TextView
+                        android:id="@+id/mode_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:padding="10dp"
+                        android:text="Folders"
+                        android:textColor="@color/aliceblue"
+                        android:textSize="20dp" />
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+
+                    </RelativeLayout>
+                </LinearLayout>
+
+
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+
+                    <nl.joery.animatedbottombar.AnimatedBottomBar
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+
+                        app:abb_indicatorAppearance="invisible"
+                        app:abb_selectedTabType="text"
+                        app:abb_tabColor="@color/aliceblue_30"
+
+                        app:abb_tabs="@menu/nav_bar_search_mode" />
+
+                    <nl.joery.animatedbottombar.AnimatedBottomBar
+                        android:id="@+id/top_navigation"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:elevation="10dp"
+                        app:abb_animationDuration="100"
+                        app:abb_indicatorAppearance="round"
+                        app:abb_indicatorColor="@color/aliceblue"
+                        app:abb_indicatorHeight="2dp"
+                        app:abb_indicatorLocation="bottom"
+                        app:abb_indicatorMargin="20dp"
+                        app:abb_selectedIndex="0"
+                        app:abb_selectedTabType="icon"
+                        app:abb_tabAnimation="fade"
+                        app:abb_tabAnimationSelected="fade"
+                        app:abb_tabColorSelected="@color/aliceblue"
+                        app:abb_tabs="@menu/nav_bar_search_mode"
+                        app:abb_textSize="0dp" />
+                </FrameLayout>
+
+            </LinearLayout>
+
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/search_view_pager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#B3000000"
+                />
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#CC000000">
+            <SeekBar
+                android:id="@+id/seekBar"
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:progressBackgroundTint="@color/aliceblue_50"
+                android:progressTint="@color/aliceblue"
+                android:thumb="@color/transparent"
+                android:thumbTint="@color/transparent"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:gravity="top"
+                />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#CC000000">
+
+
+
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</FrameLayout>
