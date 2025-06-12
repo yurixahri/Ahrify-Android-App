@@ -307,7 +307,7 @@ public class MainActivity extends AppCompatActivity implements MainIterface {
             Mediaplayer.LocalBinder binder = (Mediaplayer.LocalBinder) service;
             mediaplayer = binder.getService();
             isBound = true;
-            
+
             mediaplayer.player.setVolume(prefs.getInt("volume", 100) / 100f);
 
             play_button.setOnClickListener(v -> {
