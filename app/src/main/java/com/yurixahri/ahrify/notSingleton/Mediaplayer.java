@@ -347,11 +347,21 @@ public class Mediaplayer extends Service {
 
                 }
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError e) {
-                //Log.e("albums", "Main request failed: " + e.getMessage());
+        }, error -> {
+            if (error.networkResponse != null) {
+                int statusCode = error.networkResponse.statusCode;
+                if (statusCode >= 500) {
+                }
+            } else {
             }
+
+            song_title = file;
+            song_album = "";
+            song_artist = "";
+            song_file = file;
+            song_folder = folder;
+            song_cover = null;
+            callback.afterGetInfo(url);
         });
 
         volley.getRequestQueue().add(request);
