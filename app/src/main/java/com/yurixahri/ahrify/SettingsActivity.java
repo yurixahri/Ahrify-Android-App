@@ -10,10 +10,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
+import android.text.method.LinkMovementMethod;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,6 +32,7 @@ public class SettingsActivity extends AppCompatActivity {
     Button clear_background;
     SeekBar volume_control;
     ImageButton back_button;
+    TextView linktorepo;
     Mediaplayer mediaplayer;
     boolean isBound = false;
 
@@ -50,6 +53,7 @@ public class SettingsActivity extends AppCompatActivity {
         volume_control = findViewById(R.id.volume_control);
         back_button = findViewById(R.id.back_button);
         clear_background = findViewById(R.id.clear_background);
+        linktorepo = findViewById(R.id.linktorepo);
 
 
 
@@ -80,6 +84,8 @@ public class SettingsActivity extends AppCompatActivity {
             sendBroadcast(send);
             updateBackgroundOnStart();
         });
+
+        linktorepo.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     private void setBackground(){

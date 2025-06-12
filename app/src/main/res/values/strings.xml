@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Ahrify</string>
     <string name="text_spaces">&#160;</string>
+    <string name="linktorepo">
+        <a href="https://github.com/thinhthui/Ahrify-Android-App">here</a>
+    </string>
 </resources>
