@@ -166,16 +166,16 @@
                 android:layout_height="70dp"
                 android:orientation="horizontal">
 
+
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/imageView"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_gravity="center"
                     android:layout_margin="10dp"
-                    android:src="@drawable/icon1"
                     android:scaleType="centerCrop"
+                    android:src="@drawable/default_icon"
                     app:shapeAppearanceOverlay="@style/circleImageView" />
-
 
                 <RelativeLayout
                     android:layout_width="match_parent"

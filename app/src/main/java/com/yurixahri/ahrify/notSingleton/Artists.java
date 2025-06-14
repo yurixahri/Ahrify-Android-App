@@ -6,6 +6,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.yurixahri.ahrify.models.artist;
 import com.yurixahri.ahrify.utils.CustomVolley;
 
 import org.json.JSONArray;
@@ -23,11 +24,15 @@ public class Artists {
     final String url_artists = "https://ahrify.api.yurixahri.net/artists";
     final String url_artist_songs = "https://ahrify.api.yurixahri.net/artist_songs?name=";
 
+    public artist current_artist;
+
 
     public boolean isLoading = false;
     public int currentPage = 1;
     public final int ITEMS_PER_PAGE = 20;
     public String search = "";
+
+    public boolean isClickable = true;
 
     public Artists(){}
 

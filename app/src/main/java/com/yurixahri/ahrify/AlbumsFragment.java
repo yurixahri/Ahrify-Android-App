@@ -188,7 +188,8 @@ public class AlbumsFragment extends Fragment {
                     }
 
                     adapter.setOnItemClickListener((item, position) -> {
-                        if (!item.is_file) {
+                        if (!item.is_file && albums.isClickable) {
+                            albums.isClickable = false;
                             albums.current_album = item;
                             getSongs(item, v);
                         }
@@ -235,8 +236,6 @@ public class AlbumsFragment extends Fragment {
 
         if (container.getChildCount() > 0) {
             View currentTop = container.getChildAt(container.getChildCount() - 1);
-            currentTop.setClickable(false);
-            currentTop.setEnabled(false);
             currentTop.animate()
                     .alpha(0f)
                     .scaleX(0.8f)
@@ -276,29 +275,35 @@ public class AlbumsFragment extends Fragment {
 
                 adapter.setOnItemClickListener((item, position) -> {
                     if (item.is_file) {
+
                         if (mainIterface.getMediaService() != null){
                             mediaplayer = mainIterface.getMediaService();
-                            try {
-                                JSONObject object = albums.files.getJSONObject(position);
-                                mediaplayer.playlist = albums.files;
-                                mediaplayer.cover = item.cover;
-                                mediaplayer.index = position;
-                                mediaplayer.getSongInfo(getContext(), volley, object.getString("folder"), object.getString("file_name"), new Mediaplayer.callback() {
-                                    @Override
-                                    public void afterGetInfo(String url) {
-                                        mediaplayer.setUrl(url, new Mediaplayer.OnMediaStartListener() {
-                                            @Override
-                                            public void onMediaStarted(String url) {
-                                                mainIterface.goToSongControlActivity();
-                                            }
-                                        });
-                                    }
-                                });
-                                Log.d("play", "onSongsLoaded: ");
-                            } catch (JSONException e) {
-                                throw new RuntimeException(e);
+                            if (!mediaplayer.isLoading){
+                                try {
+                                    mediaplayer.isLoading = true;
+                                    JSONObject object = albums.files.getJSONObject(position);
+                                    mediaplayer.playlist = albums.files;
+                                    mediaplayer.cover = item.cover;
+                                    mediaplayer.index = position;
+                                    mediaplayer.playlist_title = albums.current_album.text;
+                                    mediaplayer.getSongInfo(getContext(), volley, object.getString("folder"), object.getString("file_name"), new Mediaplayer.callback() {
+                                        @Override
+                                        public void afterGetInfo(String url) {
+                                            mediaplayer.setUrl(url, new Mediaplayer.OnMediaStartListener() {
+                                                @Override
+                                                public void onMediaStarted(String url) {
+                                                    mediaplayer.isLoading = false;
+                                                    mainIterface.goToSongControlActivity();
+                                                }
+                                            });
+                                        }
+                                    });
+                                    Log.d("play", "onSongsLoaded: ");
+                                } catch (JSONException e) {
+                                    mediaplayer.isLoading = false;
+                                    throw new RuntimeException(e);
+                                }
                             }
-
                         }
                     }
                 });
@@ -311,6 +316,7 @@ public class AlbumsFragment extends Fragment {
                         .alpha(1f)
                         .translationY(0)
                         .setDuration(200)
+                        .withEndAction(()->{albums.isClickable = true;})
                         .start();
 
             }
@@ -340,8 +346,6 @@ public class AlbumsFragment extends Fragment {
                     .scaleX(1f)
                     .scaleY(1f)
                     .setDuration(200).start();
-            below.setClickable(true);
-            below.setEnabled(true);
         }
     }
 

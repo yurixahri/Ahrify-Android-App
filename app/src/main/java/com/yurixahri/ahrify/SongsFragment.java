@@ -53,6 +53,8 @@ public class SongsFragment extends Fragment {
     Mediaplayer mediaplayer;
     MainIterface mainIterface;
 
+    boolean isClickable = true;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -166,28 +168,33 @@ public class SongsFragment extends Fragment {
                     adapter.setOnItemClickListener(new DefaultListView.OnItemClickListener() {
                         @Override
                         public void onItemClick(defaultListItem item, int position) {
-                            if (mainIterface.getMediaService() != null) {
-                                mediaplayer = mainIterface.getMediaService();
-                                try {
-                                    mediaplayer.index = 0;
-                                    JSONArray array = new JSONArray();
-                                    JSONObject object = new JSONObject();
 
-                                    object.put("file_name", songs.songs.getJSONObject(item.index).getString("file_url"));
-                                    object.put("song_name", songs.songs.getJSONObject(item.index).getString("title"));
-                                    object.put("folder", songs.songs.getJSONObject(item.index).getString("folder_name"));
-                                    object.put("cover", item.cover);
+                                if (mainIterface.getMediaService() != null) {
+                                    mediaplayer = mainIterface.getMediaService();
+                                    if (!mediaplayer.isLoading){
+                                        try {
+                                            mediaplayer.isLoading = true;
+                                            mediaplayer.index = 0;
+                                            JSONArray array = new JSONArray();
+                                            JSONObject object = new JSONObject();
 
-                                    array.put(object);
-                                    mediaplayer.playlist = array;
-                                    mediaplayer.playSong();
-                                    mainIterface.goToSongControlActivity();
+                                            object.put("file_name", songs.songs.getJSONObject(item.index).getString("file_url"));
+                                            object.put("song_name", songs.songs.getJSONObject(item.index).getString("title"));
+                                            object.put("folder", songs.songs.getJSONObject(item.index).getString("folder_name"));
+                                            object.put("cover", item.cover);
 
-
-                                } catch (JSONException e) {
-                                    throw new RuntimeException(e);
+                                            array.put(object);
+                                            mediaplayer.playlist = array;
+                                            mediaplayer.playlist_title = "";
+                                            mediaplayer.playSong();
+                                            mainIterface.goToSongControlActivity();
+                                        } catch (JSONException e) {
+                                            mediaplayer.isLoading = false;
+                                            throw new RuntimeException(e);
+                                        }
+                                    }
                                 }
-                            }
+
                         }
                         @Override
                         public void onItemLongClick(defaultListItem item, int position) {

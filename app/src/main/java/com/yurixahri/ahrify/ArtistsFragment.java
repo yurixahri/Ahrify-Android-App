@@ -123,7 +123,9 @@ public class ArtistsFragment extends Fragment {
                     }
 
                     adapter.setOnItemClickListener((item, position) -> {
-                        if (!item.is_file) {
+                        if (!item.is_file && artists.isClickable) {
+                            artists.isClickable = false;
+                            artists.current_artist = item;
                             getSongs(item, v);
                         }
                     });
@@ -168,8 +170,6 @@ public class ArtistsFragment extends Fragment {
 
         if (container.getChildCount() > 0) {
             View currentTop = container.getChildAt(container.getChildCount() - 1);
-            currentTop.setClickable(false);
-            currentTop.setEnabled(false);
             currentTop.animate()
                     .alpha(0f)
                     .scaleX(0.8f)
@@ -206,25 +206,31 @@ public class ArtistsFragment extends Fragment {
                     if (item.is_file) {
                         if (mainIterface.getMediaService() != null){
                             mediaplayer = mainIterface.getMediaService();
-                            try {
-                                JSONObject object = artists.files.getJSONObject(position);
-                                mediaplayer.playlist = artists.files;
-                                mediaplayer.index = position;
-                                mediaplayer.cover = null;
-                                mediaplayer.getSongInfo(getContext(), volley, object.getString("folder"), object.getString("file_name"), new Mediaplayer.callback() {
-                                    @Override
-                                    public void afterGetInfo(String url) {
-                                        mediaplayer.setUrl(url, new Mediaplayer.OnMediaStartListener() {
-                                            @Override
-                                            public void onMediaStarted(String url) {
-                                                mainIterface.goToSongControlActivity();
-                                            }
-                                        });
+                            if (!mediaplayer.isLoading){
+                                try {
+                                    mediaplayer.isLoading = true;
+                                    JSONObject object = artists.files.getJSONObject(position);
+                                    mediaplayer.playlist = artists.files;
+                                    mediaplayer.index = position;
+                                    mediaplayer.cover = null;
+                                    mediaplayer.playlist_title = artists.current_artist.text;
+                                    mediaplayer.getSongInfo(getContext(), volley, object.getString("folder"), object.getString("file_name"), new Mediaplayer.callback() {
+                                        @Override
+                                        public void afterGetInfo(String url) {
+                                            mediaplayer.setUrl(url, new Mediaplayer.OnMediaStartListener() {
+                                                @Override
+                                                public void onMediaStarted(String url) {
+                                                    mediaplayer.isLoading = false;
+                                                    mainIterface.goToSongControlActivity();
+                                                }
+                                            });
 
-                                    }
-                                });
-                            } catch (JSONException e) {
-                                throw new RuntimeException(e);
+                                        }
+                                    });
+                                } catch (JSONException e) {
+                                    mediaplayer.isLoading = false;
+                                    throw new RuntimeException(e);
+                                }
                             }
                         }
                     }
@@ -238,6 +244,7 @@ public class ArtistsFragment extends Fragment {
                         .alpha(1f)
                         .translationY(0)
                         .setDuration(200)
+                        .withEndAction(()->{artists.isClickable = true;})
                         .start();
 
             }
@@ -266,8 +273,6 @@ public class ArtistsFragment extends Fragment {
                     .scaleX(1f)
                     .scaleY(1f)
                     .setDuration(200).start();
-            below.setClickable(true);
-            below.setEnabled(true);
         }
     }
 }

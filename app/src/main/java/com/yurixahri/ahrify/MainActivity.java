@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements MainIterface {
             }else{
                 play_button.setImageResource(R.drawable.baseline_play_arrow_24);
             }
-            Log.d("MusicService", "Playing: " + isPlaying);
+
         }
 
         @Override
@@ -98,12 +98,7 @@ public class MainActivity extends AppCompatActivity implements MainIterface {
             if (state == Player.STATE_READY) {
                 handler.removeCallbacks(updateSeekBar);
                 setupSeekBar(mediaplayer.player);
-                if (mediaplayer.song_cover != null){
-                    logo_spin.setImageBitmap(mediaplayer.song_cover);
-                }else{
-                    logo_spin.setImageResource(R.drawable.default_icon);
-                }
-                song_title.setText(mediaplayer.song_title);
+                updateSongInfo();
             }
 
         }
@@ -308,6 +303,7 @@ public class MainActivity extends AppCompatActivity implements MainIterface {
             mediaplayer = binder.getService();
             isBound = true;
 
+            updateSongInfo();
             mediaplayer.player.setVolume(prefs.getInt("volume", 100) / 100f);
 
             play_button.setOnClickListener(v -> {
@@ -320,7 +316,6 @@ public class MainActivity extends AppCompatActivity implements MainIterface {
                 }
             });
 
-            // Optional: Attach ExoPlayer Listener
             Mediaplayer.setPlayerListener(playerListener);
         }
 
@@ -345,7 +340,7 @@ public class MainActivity extends AppCompatActivity implements MainIterface {
             }
         };
 
-        // Start updates
+
         handler.post(updateSeekBar);
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -425,6 +420,15 @@ public class MainActivity extends AppCompatActivity implements MainIterface {
         }else{
             background.setImageResource(R.drawable.bg);
         }
+    }
+
+    private void updateSongInfo(){
+        if (mediaplayer.song_cover != null){
+            logo_spin.setImageBitmap(mediaplayer.song_cover);
+        }else{
+            logo_spin.setImageResource(R.drawable.default_icon);
+        }
+        song_title.setText(mediaplayer.song_title);
     }
 
 

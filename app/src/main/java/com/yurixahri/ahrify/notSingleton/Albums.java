@@ -28,6 +28,7 @@ public class Albums {
 
 
     public boolean isLoading = false;
+    public boolean isClickable = true;
     public int currentPage = 1;
     public final int ITEMS_PER_PAGE = 20;
     public String search = "";

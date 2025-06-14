@@ -26,6 +26,8 @@ public class Folders {
 
     final String url = "https://server.yurixahri.net/~/api/get_file_list?uri=";
 
+    public boolean isClickable = true;
+
 
     private Folders(){}
 

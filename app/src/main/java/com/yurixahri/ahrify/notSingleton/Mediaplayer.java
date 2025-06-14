@@ -63,6 +63,8 @@ public class Mediaplayer extends Service {
     public String song_folder = "";
     public Bitmap song_cover;
 
+    public boolean isLoading = false;
+
     CustomVolley volley;
 
     public int index;
@@ -376,6 +378,7 @@ public class Mediaplayer extends Service {
                     setUrl(url, new Mediaplayer.OnMediaStartListener() {
                         @Override
                         public void onMediaStarted(String url) {
+                            isLoading = false;
                             startForeground(NOTIFICATION_ID, buildNotification());
                         }
                     });

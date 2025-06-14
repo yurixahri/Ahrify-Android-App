@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,6 +46,9 @@ public class PlaylistsFragment extends Fragment {
 
     Mediaplayer mediaplayer;
     MainIterface mainIterface;
+
+    boolean isClickable = true;
+    String current_playlist_name;
 
     @Nullable
     @Override
@@ -105,7 +109,11 @@ public class PlaylistsFragment extends Fragment {
         db.adapter.setOnItemClickListener(new PlaylistListView.OnItemClickListener() {
             @Override
             public void onItemClick(playlist item, int position) {
-                getSongs(item);
+                if (isClickable) {
+                    isClickable = false;
+                    current_playlist_name = item.title;
+                    getSongs(item);
+                }
             }
             @Override
             public void onItemLongClick(playlist item, int position) {
@@ -161,8 +169,6 @@ public class PlaylistsFragment extends Fragment {
 
         if (container.getChildCount() > 0) {
             View currentTop = container.getChildAt(container.getChildCount() - 1);
-            currentTop.setClickable(false);
-            currentTop.setEnabled(false);
             currentTop.animate()
                     .alpha(0f)
                     .scaleX(0.8f)
@@ -176,26 +182,31 @@ public class PlaylistsFragment extends Fragment {
         db.adapter_playlist_song.setOnItemClickListener(new PlaylistSongListView.OnItemClickListener() {
             @Override
             public void onItemClick(playlistSong item, int position) {
-                if (mainIterface.getMediaService() != null) {
-                    mediaplayer = mainIterface.getMediaService();
-                    JSONArray playlist = new JSONArray();
-                    for (int i = 0; i < db.playlistSongs.size(); i++){
-                        JSONObject object = new JSONObject();
-                        try {
-                            object.put("file_name", db.playlistSongs.get(i).file);
-                            object.put("song_name", db.playlistSongs.get(i).title);
-                            object.put("folder", db.playlistSongs.get(i).folder);
-                            if (db.playlistSongs.get(i).cover != null) object.put("cover", BitmapCompressor.blobToBitmap(db.playlistSongs.get(i).cover));
-                            playlist.put(object);
-                        } catch (JSONException e) {
-                            throw new RuntimeException(e);
+                    if (mainIterface.getMediaService() != null) {
+                        mediaplayer = mainIterface.getMediaService();
+                        if (!mediaplayer.isLoading){
+                            mediaplayer.isLoading = true;
+                            JSONArray playlist = new JSONArray();
+                            for (int i = 0; i < db.playlistSongs.size(); i++){
+                                JSONObject object = new JSONObject();
+                                try {
+                                    object.put("file_name", db.playlistSongs.get(i).file);
+                                    object.put("song_name", db.playlistSongs.get(i).title);
+                                    object.put("folder", db.playlistSongs.get(i).folder);
+                                    if (db.playlistSongs.get(i).cover != null) object.put("cover", BitmapCompressor.blobToBitmap(db.playlistSongs.get(i).cover));
+                                    playlist.put(object);
+                                } catch (JSONException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                            mediaplayer.playlist = playlist;
+                            mediaplayer.index = position;
+                            mediaplayer.playlist_title = current_playlist_name;
+
+                            mediaplayer.playSong();
+                            mainIterface.goToSongControlActivity();
                         }
                     }
-                    mediaplayer.playlist = playlist;
-                    mediaplayer.index = position;
-                    mediaplayer.playSong();
-                    mainIterface.goToSongControlActivity();
-                }
 
             }
 
@@ -230,6 +241,7 @@ public class PlaylistsFragment extends Fragment {
                 .alpha(1f)
                 .translationY(0)
                 .setDuration(200)
+                .withEndAction(()->{isClickable = true;})
                 .start();
 
     }
@@ -256,8 +268,6 @@ public class PlaylistsFragment extends Fragment {
                     .scaleX(1f)
                     .scaleY(1f)
                     .setDuration(200).start();
-            below.setClickable(true);
-            below.setEnabled(true);
         }
     }
 

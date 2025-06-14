@@ -99,8 +99,6 @@ public class FoldersFragment extends Fragment {
 
         if (container.getChildCount() > 0) {
             View currentTop = container.getChildAt(container.getChildCount() - 1);
-            currentTop.setClickable(false);
-            currentTop.setEnabled(false);
             currentTop.animate()
                     .alpha(0f)
                     .scaleX(0.8f)
@@ -125,42 +123,49 @@ public class FoldersFragment extends Fragment {
                 list_view.setAdapter(adapter);
 
                 adapter.setOnItemClickListener((item, position) -> {
-                    if (item.is_folder) {
-//                        Toast.makeText(getContext(), "Clicked folder: " + item.text, Toast.LENGTH_SHORT).show();
+                    if (item.is_folder && folders.isClickable) {
+                        folders.isClickable = false;
                         folders.current_path.add(item.text);
                         openFolder(v);
-                    } else {
-                        JSONArray playlist = new JSONArray();
-                        for (short i = 0; i < folders.files.size(); i++){
-                            try {
-                                JSONObject song = new JSONObject();
-                                song.put("folder", String.join("/", folders.current_path));
-                                song.put("file_name", folders.files.get(i));
-                                playlist.put(song);
-                            } catch (Exception e) {
-                                throw new RuntimeException(e);
+                    } else if (!item.is_folder){
+
+                            JSONArray playlist = new JSONArray();
+                            for (short i = 0; i < folders.files.size(); i++){
+                                try {
+                                    JSONObject song = new JSONObject();
+                                    song.put("folder", String.join("/", folders.current_path));
+                                    song.put("file_name", folders.files.get(i));
+                                    playlist.put(song);
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
+                                }
                             }
-                        }
 
 
-                        if (mainIterface.getMediaService() != null){
-                            mediaplayer = mainIterface.getMediaService();
-                            mediaplayer.playlist = playlist;
-                            mediaplayer.cover = null;
-                            mediaplayer.index = position - folders.folders.size();
-                            mediaplayer.getSongInfo(getContext(), volley, String.join("/", folders.current_path), item.text, new Mediaplayer.callback() {
-                                @Override
-                                public void afterGetInfo(String url) {
-                                    mediaplayer.setUrl(url, new Mediaplayer.OnMediaStartListener() {
+                            if (mainIterface.getMediaService() != null){
+                                mediaplayer = mainIterface.getMediaService();
+                                if (!mediaplayer.isLoading){
+                                    mediaplayer.isLoading = true;
+                                    mediaplayer.playlist = playlist;
+                                    mediaplayer.cover = null;
+                                    mediaplayer.index = position - folders.folders.size();
+                                    mediaplayer.playlist_title = folders.current_path.get(folders.current_path.size() - 1);
+                                    mediaplayer.getSongInfo(getContext(), volley, String.join("/", folders.current_path), item.text, new Mediaplayer.callback() {
                                         @Override
-                                        public void onMediaStarted(String url) {
-                                            mainIterface.goToSongControlActivity();
+                                        public void afterGetInfo(String url) {
+                                            mediaplayer.setUrl(url, new Mediaplayer.OnMediaStartListener() {
+                                                @Override
+                                                public void onMediaStarted(String url) {
+                                                    mediaplayer.isLoading = false;
+                                                    mainIterface.goToSongControlActivity();
+                                                }
+                                            });
                                         }
                                     });
                                 }
-                            });
 
-                        }
+                            }
+
                     }
                 });
 
@@ -173,7 +178,9 @@ public class FoldersFragment extends Fragment {
                         .alpha(1f)
                         .translationY(0)
                         .setDuration(200)
+                        .withEndAction(()->{folders.isClickable = true;})
                         .start();
+
 
                 folders_list.add(list);
             }
@@ -202,8 +209,6 @@ public class FoldersFragment extends Fragment {
                     .scaleX(1f)
                     .scaleY(1f)
                     .setDuration(200).start();
-            below.setClickable(true);
-            below.setEnabled(true);
         }
     }
 

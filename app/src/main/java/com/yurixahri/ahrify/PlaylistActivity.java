@@ -17,6 +17,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 
 public class PlaylistActivity extends AppCompatActivity {
     ImageButton button;
+    TextView playlist_title;
     ImageView place_holder;
     FrameLayout container;
 
@@ -81,6 +83,7 @@ public class PlaylistActivity extends AppCompatActivity {
         button = findViewById(R.id.back_button);
         place_holder = findViewById(R.id.place_holder);
         container = findViewById(R.id.container);
+        playlist_title = findViewById(R.id.playlist_title);
 
         button.setOnClickListener(this::CloseTest);
 
@@ -116,6 +119,7 @@ public class PlaylistActivity extends AppCompatActivity {
             isBound = true;
 
             if (mediaplayer.playlist.length() > 0){
+                playlist_title.setText(mediaplayer.playlist_title);
                 place_holder.setVisibility(View.GONE);
                 ArrayList<defaultListItem> list = new ArrayList<>();
                 ListView list_view = new ListView(PlaylistActivity.this);
