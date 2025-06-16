@@ -112,6 +112,7 @@ public class SettingsActivity extends AppCompatActivity {
                 updateBackgroundOnStart();
 
                 Intent intent = new Intent("com.yurixahri.AHRIFY_UPDATE_BACKGROUND");
+                intent.setPackage(getPackageName());
                 sendBroadcast(intent);
 
             } catch (IOException e) {
