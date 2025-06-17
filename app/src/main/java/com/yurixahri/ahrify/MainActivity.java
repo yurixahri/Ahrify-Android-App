@@ -36,6 +36,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager.widget.ViewPager;
 
 import com.yurixahri.ahrify.adapters.MainViewPageAdapter;
@@ -264,10 +265,9 @@ public class MainActivity extends AppCompatActivity implements MainIterface {
 
         settings_button.setOnClickListener(v -> ToSettings());
 
-        registerReceiver(
+        LocalBroadcastManager.getInstance(this).registerReceiver(
                 backgroundUpdateReceiver,
-                new IntentFilter("com.yurixahri.AHRIFY_UPDATE_BACKGROUND"),
-                Context.RECEIVER_NOT_EXPORTED
+                new IntentFilter("com.yurixahri.AHRIFY_UPDATE_BACKGROUND")
         );
 
 

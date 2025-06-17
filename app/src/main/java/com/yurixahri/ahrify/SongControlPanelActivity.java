@@ -31,6 +31,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.yurixahri.ahrify.adapters.PlaylistListView;
 import com.yurixahri.ahrify.models.playlist;
@@ -211,8 +212,8 @@ public class SongControlPanelActivity extends AppCompatActivity {
                         Toast.makeText(context, "Added a new playlist", Toast.LENGTH_SHORT).show();
 
                         Intent update_playlist = new Intent("com.yurixahri.AHRIFY_UPDATE_PLAYLIST");
-                        update_playlist.setPackage(getPackageName());
-                        sendBroadcast(update_playlist);
+                        LocalBroadcastManager.getInstance(this).sendBroadcast(update_playlist);
+
                         add_view_dialog.dismiss();
                     }
                 });

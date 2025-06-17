@@ -1,5 +1,6 @@
 package com.yurixahri.ahrify;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.yurixahri.ahrify.adapters.PlaylistListView;
 import com.yurixahri.ahrify.adapters.PlaylistSongListView;
@@ -53,6 +55,7 @@ public class PlaylistsFragment extends Fragment {
 
     boolean isClickable = true;
     String current_playlist_name;
+
 
     @Nullable
     @Override
@@ -147,10 +150,10 @@ public class PlaylistsFragment extends Fragment {
 
         checkVisibility();
 
-        requireActivity().registerReceiver(
+
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
                 backgroundUpdateReceiver,
-                new IntentFilter("com.yurixahri.AHRIFY_UPDATE_PLAYLIST"),
-                Context.RECEIVER_NOT_EXPORTED
+                new IntentFilter("com.yurixahri.AHRIFY_UPDATE_PLAYLIST")
         );
 
     }
@@ -290,6 +293,7 @@ public class PlaylistsFragment extends Fragment {
             list_view.setVisibility(View.GONE);
         }
     }
+
 
     private final BroadcastReceiver backgroundUpdateReceiver = new BroadcastReceiver() {
         @Override

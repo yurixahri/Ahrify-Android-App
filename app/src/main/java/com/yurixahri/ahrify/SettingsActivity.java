@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.yurixahri.ahrify.notSingleton.Mediaplayer;
 import com.yurixahri.ahrify.utils.BitmapCompressor;
@@ -81,7 +82,7 @@ public class SettingsActivity extends AppCompatActivity {
         clear_background.setOnClickListener(v -> {
             prefs.edit().remove("background").apply();
             Intent send = new Intent("com.yurixahri.AHRIFY_UPDATE_BACKGROUND");
-            sendBroadcast(send);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(send);
             updateBackgroundOnStart();
         });
 
@@ -112,8 +113,8 @@ public class SettingsActivity extends AppCompatActivity {
                 updateBackgroundOnStart();
 
                 Intent intent = new Intent("com.yurixahri.AHRIFY_UPDATE_BACKGROUND");
-                intent.setPackage(getPackageName());
-                sendBroadcast(intent);
+                LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
 
             } catch (IOException e) {
                 e.printStackTrace();
