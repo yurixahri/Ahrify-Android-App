@@ -1,8 +1,12 @@
 package com.yurixahri.ahrify;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -143,6 +147,12 @@ public class PlaylistsFragment extends Fragment {
 
         checkVisibility();
 
+        requireActivity().registerReceiver(
+                backgroundUpdateReceiver,
+                new IntentFilter("com.yurixahri.AHRIFY_UPDATE_PLAYLIST"),
+                Context.RECEIVER_NOT_EXPORTED
+        );
+
     }
 
     private void getSongs(playlist playlist){
@@ -280,4 +290,13 @@ public class PlaylistsFragment extends Fragment {
             list_view.setVisibility(View.GONE);
         }
     }
+
+    private final BroadcastReceiver backgroundUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals("com.yurixahri.AHRIFY_UPDATE_PLAYLIST")) {
+                checkVisibility();
+            }
+        }
+    };
 }

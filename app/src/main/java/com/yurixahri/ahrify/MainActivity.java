@@ -264,18 +264,11 @@ public class MainActivity extends AppCompatActivity implements MainIterface {
 
         settings_button.setOnClickListener(v -> ToSettings());
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(
-                    backgroundUpdateReceiver,
-                    new IntentFilter("com.yurixahri.AHRIFY_UPDATE_BACKGROUND"),
-                    Context.RECEIVER_NOT_EXPORTED
-            );
-        } else {
-            registerReceiver(
-                    backgroundUpdateReceiver,
-                    new IntentFilter("com.yurixahri.AHRIFY_UPDATE_BACKGROUND")
-            );
-        }
+        registerReceiver(
+                backgroundUpdateReceiver,
+                new IntentFilter("com.yurixahri.AHRIFY_UPDATE_BACKGROUND"),
+                Context.RECEIVER_NOT_EXPORTED
+        );
 
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {

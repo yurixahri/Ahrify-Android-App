@@ -209,6 +209,10 @@ public class SongControlPanelActivity extends AppCompatActivity {
                         db.updatePlaylists(playlistDAO.getAll());
 
                         Toast.makeText(context, "Added a new playlist", Toast.LENGTH_SHORT).show();
+
+                        Intent update_playlist = new Intent("com.yurixahri.AHRIFY_UPDATE_PLAYLIST");
+                        update_playlist.setPackage(getPackageName());
+                        sendBroadcast(update_playlist);
                         add_view_dialog.dismiss();
                     }
                 });
