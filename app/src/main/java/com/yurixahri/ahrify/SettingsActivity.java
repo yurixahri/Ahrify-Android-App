@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,6 +27,8 @@ import com.yurixahri.ahrify.utils.BitmapCompressor;
 
 import java.io.IOException;
 
+
+
 public class SettingsActivity extends AppCompatActivity {
     private static final int IMAGE_PICK_CODE = 1000;
     SharedPreferences prefs;
@@ -34,6 +37,7 @@ public class SettingsActivity extends AppCompatActivity {
     SeekBar volume_control;
     ImageButton back_button;
     TextView linktorepo;
+    TextView version;
     Mediaplayer mediaplayer;
     boolean isBound = false;
 
@@ -55,8 +59,13 @@ public class SettingsActivity extends AppCompatActivity {
         back_button = findViewById(R.id.back_button);
         clear_background = findViewById(R.id.clear_background);
         linktorepo = findViewById(R.id.linktorepo);
+        version = findViewById(R.id.version);
 
-
+        try {
+            version.setText(this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new RuntimeException(e);
+        }
 
         back_button.setOnClickListener(v -> endActivity());
         set_background.setOnClickListener(v -> setBackground());
