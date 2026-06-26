@@ -12,7 +12,7 @@ public class defaultListItem {
     public defaultListItem(String text, int drawable, String thumbnail) {
         this.text = text;
         this.drawable = drawable;
-        this.thumbnail = thumbnail;
+        this.thumbnail = thumbnail.startsWith("https") ||  thumbnail.startsWith("http") ? thumbnail : url_thumbnail + thumbnail;
     }
 
     public defaultListItem(String text, int drawable, String thumbnail,  int index) {

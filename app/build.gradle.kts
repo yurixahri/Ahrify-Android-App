@@ -26,6 +26,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -37,6 +38,7 @@ android {
 }
 
 dependencies {
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     implementation(libs.appcompat)
     implementation(libs.material)
@@ -46,8 +48,11 @@ dependencies {
     implementation(libs.library)
     implementation(libs.glide)
     implementation(libs.exoplayer)
+
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.session)
+    implementation(libs.media)
+    implementation (libs.media3.ffmpeg.decoder)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

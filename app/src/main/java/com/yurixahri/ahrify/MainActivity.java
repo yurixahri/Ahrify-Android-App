@@ -37,6 +37,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.Player;
+import androidx.media3.exoplayer.ExoPlayer;
 import androidx.viewpager.widget.ViewPager;
 
 import com.bumptech.glide.Glide;
@@ -49,9 +52,9 @@ import com.yurixahri.ahrify.notSingleton.Mediaplayer;
 import nl.joery.animatedbottombar.AnimatedBottomBar;
 
 import com.yurixahri.ahrify.utils.BitmapCompressor;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.Player;
+//import com.google.android.exoplayer2.ExoPlayer;
+//import com.google.android.exoplayer2.MediaItem;
+//import com.google.android.exoplayer2.Player;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 public class MainActivity extends AppCompatActivity implements MainIterface {

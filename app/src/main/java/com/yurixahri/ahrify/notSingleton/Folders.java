@@ -21,6 +21,9 @@ import com.yurixahri.ahrify.utils.NaturalOrderComparator;
 public class Folders {
     public ArrayList<String> folders = new ArrayList<String>();
     public ArrayList<String> files = new ArrayList<String>();
+
+    public ArrayList<ArrayList<String>> folders_list = new ArrayList<ArrayList<String>>();
+    public ArrayList<ArrayList<String>> files_list = new ArrayList<ArrayList<String>>();
     public ArrayList<String> current_path = new ArrayList<String>();
     public ArrayList<String> previous_path = new ArrayList<String>();
 
@@ -83,9 +86,11 @@ public class Folders {
                     } catch (Exception e) {}
                 }
 
-                NaturalOrderComparator comparator = new NaturalOrderComparator();
-                folders.sort(comparator);
-                files.sort(comparator);
+//                NaturalOrderComparator comparator = new NaturalOrderComparator();
+//                folders.sort(comparator);
+//                files.sort(comparator);
+                files_list.add(new ArrayList<String>(files));
+                folders_list.add(new ArrayList<String>(folders));
 
                 callback.onListLoaded();
             }

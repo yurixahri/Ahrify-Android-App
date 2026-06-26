@@ -4,57 +4,59 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.media.AudioFormat;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.SystemClock;
-import android.support.v4.media.session.MediaSessionCompat;
-import android.util.Base64;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.OptIn;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.Player;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.exoplayer.DefaultRenderersFactory;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.RenderersFactory;
+import androidx.media3.exoplayer.audio.AudioCapabilities;
+import androidx.media3.exoplayer.audio.AudioSink;
+import androidx.media3.exoplayer.audio.DefaultAudioSink;
+import androidx.media3.exoplayer.mediacodec.MediaCodecInfo;
+import androidx.media3.exoplayer.mediacodec.MediaCodecSelector;
+import androidx.media3.exoplayer.mediacodec.MediaCodecUtil;
+import androidx.media3.session.MediaSession;
+import androidx.media3.session.MediaSessionService;
+import androidx.media3.session.MediaStyleNotificationHelper;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.yurixahri.ahrify.MainActivity;
 import com.yurixahri.ahrify.R;
 import com.yurixahri.ahrify.services.NotificationActionReceiver;
-import com.yurixahri.ahrify.utils.BitmapCompressor;
 import com.yurixahri.ahrify.utils.CustomVolley;
-import com.google.android.exoplayer2.DefaultRenderersFactory;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.RenderersFactory;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Random;
 
-public class Mediaplayer extends Service {
+public class Mediaplayer extends MediaSessionService {
     public JSONArray playlist = new JSONArray();
     public String playlist_title;
-
 
     public final String url_thumbnail = "https://ahrify.yurixahri.net/~/files/thumbnails/";
     public final String url_cover = "https://ahrify.yurixahri.net/~/files/covers/";
@@ -83,15 +85,14 @@ public class Mediaplayer extends Service {
     private long pausedTime = 0;
     private long totalPausedDuration = 0;
 
-
     public static final String CHANNEL_ID = "music_channel";
     public static final int NOTIFICATION_ID = 1;
 
     public static final String ACTION_PLAY_PAUSE = "com.yurixahri.ACTION_PLAY_PAUSE";
     public static final String ACTION_NEXT = "com.yurixahri.ACTION_NEXT";
     public static final String ACTION_PREV = "com.yurixahri.ACTION_PREV";
-    private MediaSessionCompat mediaSession;
 
+    private MediaSession mediaSession;
 
     public static ExoPlayer player;
     private final IBinder binder = new LocalBinder();
@@ -106,29 +107,61 @@ public class Mediaplayer extends Service {
         }
     }
 
+    @OptIn(markerClass = UnstableApi.class)
     @Override
     public void onCreate() {
         super.onCreate();
         createNotificationChannel();
         volley = new CustomVolley(getApplicationContext());
-        mediaSession = new MediaSessionCompat(getApplicationContext(), "AhrifySession");
-        mediaSession.setActive(true);
 
-        RenderersFactory renderersFactory = new DefaultRenderersFactory(this)
-                .setEnableAudioOffload(false) // <- disables clock drift from offloading
-                .setEnableAudioTrackPlaybackParams(true); // <- uses real audio clock
+        // Step 1: Handle the 24-bit FLAC hardware driver bypass rule smoothly
+        MediaCodecSelector fallbackCodecSelector = (mimeType, requiresSecureDecoder, requiresTunnelingDecoder) -> {
+            java.util.List<MediaCodecInfo> decoders =
+                    MediaCodecUtil.getDecoderInfos(mimeType, requiresSecureDecoder, requiresTunnelingDecoder);
+            if ("audio/flac".equalsIgnoreCase(mimeType)) {
+                java.util.List<MediaCodecInfo> filteredDecoders = new java.util.ArrayList<>();
+                for (MediaCodecInfo decoder : decoders) {
+                    String name = decoder.name.toLowerCase();
+                    if (name.contains("qti.audio") || name.contains("qcom.audio") || name.contains("qti.flac")) {
+                        Log.i("Mediaplayer", "Skipping incomplete vendor decoder: " + decoder.name);
+                        continue; // Bypasses the broken 24-bit pipeline
+                    }
+                    filteredDecoders.add(decoder);
+                }
+                return filteredDecoders;
+            }
+            return decoders;
+        };
+
+        // Step 2: Use the stock pipeline architecture to maintain audible 16-bit and 24-bit playback
+        RenderersFactory renderersFactory = new DefaultRenderersFactory(this) {
+            @NonNull
+            @Override
+            protected AudioSink buildAudioSink(
+                    Context context, boolean enableFloatOutput, boolean enableAudioTrackPlaybackParams) {
+
+                return new DefaultAudioSink.Builder(context)
+                        .setEnableFloatOutput(true) // Keep this false so it doesn't force 32-bit float
+                        .build();
+            }
+        }.setMediaCodecSelector(fallbackCodecSelector)
+        .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+        .setEnableAudioTrackPlaybackParams(true);
+
+
 
         player = new ExoPlayer.Builder(this, renderersFactory).build();
         player.setPlaybackSpeed(1.0f);
+
+        // Step 3: Initialize the Media3 MediaSession bound directly to the player
+        mediaSession = new MediaSession.Builder(this, player).build();
 
         player.addListener(new Player.Listener() {
             @Override
             public void onIsPlayingChanged(boolean isPlaying) {
                 if (isPlaying) {
                     startPositionTracking();
-                    if (isTrackingPosition) {
-
-                    } else {
+                    if (!isTrackingPosition) {
                         if (pausedTime > 0) {
                             totalPausedDuration += SystemClock.elapsedRealtime() - pausedTime;
                             pausedTime = 0;
@@ -171,31 +204,50 @@ public class Mediaplayer extends Service {
                             break;
                     }
                 }
-
             }
         });
+
         startForeground(NOTIFICATION_ID, buildNotification());
+    }
+
+    // Required by MediaSessionService to provide session connectivity to external controllers
+    @Nullable
+    @Override
+    public MediaSession onGetSession(MediaSession.ControllerInfo controllerInfo) {
+        return mediaSession;
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        // Keeps both local UI components binding and systemic controllers running smoothly
+        IBinder superBinder = super.onBind(intent);
+        if (superBinder != null) {
+            return superBinder;
+        }
         return binder;
     }
 
     @Override
     public void onDestroy() {
+        if (mediaSession != null) {
+            mediaSession.release();
+            mediaSession = null;
+        }
+        if (player != null) {
+            player.release();
+            player = null;
+        }
         super.onDestroy();
-        player.release();
     }
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
-        // Stop player
         if (player != null) {
             player.stop();
             player.release();
+            player = null;
         }
         stopSelf();
     }
@@ -204,9 +256,9 @@ public class Mediaplayer extends Service {
         void onMediaStarted(String url);
     }
 
-
     public void setUrl(String url, OnMediaStartListener callback) {
         Log.d("seturl", base_url + url);
+        // Media3 handles media entries natively through MediaItem
         MediaItem item = MediaItem.fromUri(base_url + url);
         player.setMediaItem(item);
         player.prepare();
@@ -258,6 +310,7 @@ public class Mediaplayer extends Service {
         }
     }
 
+    @OptIn(markerClass = UnstableApi.class)
     private Notification buildNotification() {
         int playPauseIcon = player.isPlaying() ? R.drawable.pause : R.drawable.baseline_play_arrow_24;
 
@@ -270,8 +323,7 @@ public class Mediaplayer extends Service {
                 .addAction(R.drawable.skip_previous, "Previous", getPendingIntent(ACTION_PREV))
                 .addAction(playPauseIcon, "Play/Pause", getPendingIntent(ACTION_PLAY_PAUSE))
                 .addAction(R.drawable.skip_next, "Next", getPendingIntent(ACTION_NEXT))
-                .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
-                        .setMediaSession(mediaSession.getSessionToken())
+                .setStyle(new MediaStyleNotificationHelper.MediaStyle(mediaSession)
                         .setShowActionsInCompactView(0, 1, 2))
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setOngoing(player.isPlaying())
@@ -280,28 +332,25 @@ public class Mediaplayer extends Service {
         if (song_cover != null && !song_cover.isEmpty()) {
             Glide.with(getApplicationContext())
                     .asBitmap()
-                    .load(song_thumbnail) // Your image URL string
+                    .load(song_cover)
                     .into(new CustomTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                            // Update the builder with the newly downloaded bitmap
                             builder.setLargeIcon(resource);
-                            // Push the update out to the system bar dynamically
                             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
-                            // Replace NOTIFICATION_ID with your actual integer constant (e.g., 1)
-                            notificationManager.notify(NOTIFICATION_ID, builder.build());
+                            try {
+                                notificationManager.notify(NOTIFICATION_ID, builder.build());
+                            } catch (SecurityException e) {
+                                Log.e("Mediaplayer", "Notification permission missing", e);
+                            }
                         }
                         @Override
-                        public void onLoadCleared(@Nullable Drawable placeholder) {
-                            // No action required here
-                        }
+                        public void onLoadCleared(@Nullable Drawable placeholder) {}
                     });
         }
 
         return builder.build();
     }
-
-
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -315,36 +364,16 @@ public class Mediaplayer extends Service {
     }
 
     public void getSongInfo(Context context, CustomVolley volley, short index, String folder, String file, callback callback) {
-//        String encoded_folder = "";
-//        String encoded_file = "";
-//        try {
-//            encoded_folder = URLEncoder.encode(folder, "UTF-8");
-//            encoded_file = URLEncoder.encode(file, "UTF-8");
-//        } catch (UnsupportedEncodingException e) {
-//            //todo
-//        }
-
         String url = folder + "/" + file;
         String param = "?folder=" + folder + "&id=" + file;
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, song_info_url + param, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                try {
-                    for (int i = 0; i < response.length(); i++) {
-                        playlist.put(index, response.getJSONObject(i));
-                    }
-                } catch (JSONException e) {
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, song_info_url + param, null, response -> {
+            try {
+                for (int i = 0; i < response.length(); i++) {
+                    playlist.put(index, response.getJSONObject(i));
                 }
-                callback.afterGetInfo(url, index);
-            }
+            } catch (JSONException ignored) {}
+            callback.afterGetInfo(url, index);
         }, error -> {
-            if (error.networkResponse != null) {
-                int statusCode = error.networkResponse.statusCode;
-                if (statusCode >= 500) {
-                }
-            } else {
-            }
-
             song_title = file;
             song_album = "";
             song_artist = "";
@@ -366,17 +395,16 @@ public class Mediaplayer extends Service {
             song_artist = object.getString("artist");
             song_file = object.getString("id");
             song_folder = object.getString("folder");
-            song_thumbnail = object.getString("thumbnail").startsWith("https") ||  object.getString("thumbnail").startsWith("http") ? object.getString("thumbnail") : url_thumbnail + object.getString("thumbnail");
-            song_cover = object.getString("cover").startsWith("https") ||  object.getString("cover").startsWith("http") ? object.getString("cover") : url_cover + object.getString("cover");
+            song_thumbnail = object.getString("thumbnail").startsWith("https") || object.getString("thumbnail").startsWith("http") ? object.getString("thumbnail") : url_thumbnail + object.getString("thumbnail");
+            song_cover = object.getString("cover").startsWith("https") || object.getString("cover").startsWith("http") ? object.getString("cover") : url_cover + object.getString("cover");
 
-            String path =  song_folder+"/"+song_file;
+            String path = song_folder + "/" + song_file;
 
-            setUrl(path, new Mediaplayer.OnMediaStartListener() {
-                @Override
-                public void onMediaStarted(String url) {
-                    isLoading = false;
-                    startForeground(NOTIFICATION_ID, buildNotification());
-                }
+            setUrl(path, url -> {
+                isLoading = false;
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+//                    startForeground(NOTIFICATION_ID, buildNotification());
+//                }
             });
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -420,5 +448,4 @@ public class Mediaplayer extends Service {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
     }
-
 }

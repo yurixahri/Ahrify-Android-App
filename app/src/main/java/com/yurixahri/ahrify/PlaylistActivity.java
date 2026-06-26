@@ -24,13 +24,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.media3.common.Player;
 
 import com.yurixahri.ahrify.adapters.DefaultListView;
 import com.yurixahri.ahrify.models.defaultListItem;
 import com.yurixahri.ahrify.notSingleton.Mediaplayer;
 import com.yurixahri.ahrify.utils.BitmapCompressor;
 import com.yurixahri.ahrify.utils.CustomVolley;
-import com.google.android.exoplayer2.Player;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,8 +58,6 @@ public class PlaylistActivity extends AppCompatActivity {
                 adapter.setHighlightIndex(mediaplayer.index);
             }
         }
-
-
     };
 
 
@@ -133,7 +131,7 @@ public class PlaylistActivity extends AppCompatActivity {
                     try {
                         JSONObject item = mediaplayer.playlist.getJSONObject(i);
                         String text = !item.getString("title").isEmpty() ? item.getString("id") : item.getString("title");
-                        list.add(new defaultListItem(text, R.drawable.default_icon, item.has("thumbnail")  ? (String) item.get("thumbnail") : mediaplayer.song_thumbnail));
+                        list.add(new defaultListItem(text, R.drawable.default_icon, item.getString("thumbnail")));
                     } catch (JSONException e) {
                         Log.e("playlist", e.getMessage() );
                     }

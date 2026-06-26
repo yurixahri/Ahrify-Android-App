@@ -3,6 +3,6 @@
     <style name="Base.Theme.Ahrify" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:windowFullscreen">true</item>
         <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+         <item name="colorPrimary">@color/black</item>
     </style>
 </resources>

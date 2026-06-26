@@ -66,10 +66,8 @@ public class DefaultListView extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        if (convertView == null) {
-            LayoutInflater inflater = LayoutInflater.from(context);
-            convertView = inflater.inflate(layout, parent, false);
-        }
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        convertView = inflater.inflate( layout,null);
 
         defaultListItem item = list.get(position);
         TextView text = convertView.findViewById(R.id.listview_item_text);

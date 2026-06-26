@@ -1,6 +1,7 @@
 package com.yurixahri.ahrify;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,8 +51,13 @@ public class FoldersFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         folders_list.clear();
+
         folders.folders.clear();
         folders.files.clear();
+
+        folders.folders_list.clear();
+        folders.files_list.clear();
+
         folders.current_path.clear();
         folders.previous_path.clear();
 
@@ -72,6 +78,10 @@ public class FoldersFragment extends Fragment {
             if(!folders.current_path.isEmpty()){
                 folders.current_path.remove(folders.current_path.size()-1);
                 folders_list.remove(folders_list.size()-1);
+                folders.files_list.remove(folders.files_list.size() -1);
+                folders.folders_list.remove(folders.folders_list.size()-1);
+                Log.i("song", "folders "+ folders.folders_list + "files" + folders.files_list);
+
                 goBack();
             }
         });
@@ -111,6 +121,8 @@ public class FoldersFragment extends Fragment {
         folders.getList(volley, new Folders.FolderListCallback() {
             @Override
             public void onListLoaded() {
+                Log.i("song", "folders "+ folders.folders_list + "files" + folders.files_list);
+
                 for (String folder : folders.folders){
                     list.add(new folder(R.drawable.folder_aliceblue, folder, true));
                 }
@@ -133,15 +145,16 @@ public class FoldersFragment extends Fragment {
                                 mediaplayer.playlist = new JSONArray();
                             }
                             if (mediaplayer.isLoading) return;
-                            for (short i = 0; i < folders.files.size(); i++){
+                            for (short i = 0; i < folders.files_list.get(folders.files_list.size()-1).size(); i++){
                                 mediaplayer.playlist.put(new JSONObject());
                             }
-                            for (short i = 0; i < folders.files.size(); i++){
+                            for (short i = 0; i < folders.files_list.get(folders.files_list.size()-1).size(); i++){
                                 try {
-                                    mediaplayer.getSongInfo(getContext(), volley, i, String.join("/", folders.current_path), folders.files.get(i), new Mediaplayer.callback() {
+                                    mediaplayer.getSongInfo(getContext(), volley, i, String.join("/", folders.current_path), folders.files_list.get(folders.files_list.size()-1).get(i), new Mediaplayer.callback() {
                                         @Override
                                         public void afterGetInfo(String url, short index) {
-                                            if (index == position - folders.folders.size())
+                                            Log.i("song", "url: "+ url);
+                                            if (index == position - folders.folders_list.get(folders.folders_list.size() -1).size())
                                                 mediaplayer.setUrl(url, new Mediaplayer.OnMediaStartListener() {
                                                     @Override
                                                     public void onMediaStarted(String url) {
