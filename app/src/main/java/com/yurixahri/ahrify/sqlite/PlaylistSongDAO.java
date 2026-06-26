@@ -24,6 +24,9 @@ public class PlaylistSongDAO {
         values.put("file", playlistSong.file);
         values.put("folder", playlistSong.folder);
         values.put("title", playlistSong.title);
+        values.put("artist", playlistSong.artist);
+        values.put("album", playlistSong.album);
+        values.put("thumbnail", playlistSong.thumbnail);
         values.put("cover", playlistSong.cover);
         values.put("playlist_id", playlistSong.playlist_id);
         return db.insert("playlist_song", null, values);
@@ -40,10 +43,14 @@ public class PlaylistSongDAO {
             playlistSong.file = cursor.getString(0);
             playlistSong.folder = cursor.getString(1);
             playlistSong.title = cursor.getString(2);
-            playlistSong.cover = cursor.getBlob(3);
-            playlistSong.playlist_id = cursor.getInt(4);
+            playlistSong.artist = cursor.getString(3);
+            playlistSong.album = cursor.getString(4);
+            playlistSong.thumbnail = cursor.getString(5);
+            playlistSong.cover = cursor.getString(6);
+            playlistSong.playlist_id = cursor.getInt(7);
             list.add(playlistSong);
         }
+        cursor.close();
         return list;
     }
 

@@ -4,15 +4,17 @@ import android.graphics.Bitmap;
 
 public class song {
     public int drawable;
-    public Bitmap cover;
+    public String thumbnail;
     public String text;
+
+    public final String url_thumbnail = "https://ahrify.yurixahri.net/~/files/thumbnails/";
 
     public song() {
     }
 
-    public song(int drawable, Bitmap cover, String text) {
+    public song(int drawable, String thumbnail, String text) {
         this.drawable = drawable;
-        this.cover = cover;
+        this.thumbnail = url_thumbnail + thumbnail;
         this.text = text;
     }
 }

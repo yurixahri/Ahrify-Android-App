@@ -132,8 +132,8 @@ public class PlaylistActivity extends AppCompatActivity {
                 for (short i =0; i < mediaplayer.playlist.length(); i++){
                     try {
                         JSONObject item = mediaplayer.playlist.getJSONObject(i);
-                        String text = (item.has("song_name") && !item.getString("song_name").isEmpty()) ? item.getString("song_name") : item.getString("file_name");
-                            list.add(new defaultListItem(text, R.drawable.default_icon, item.has("cover")  ? (Bitmap) item.get("cover") : mediaplayer.cover));
+                        String text = !item.getString("title").isEmpty() ? item.getString("id") : item.getString("title");
+                        list.add(new defaultListItem(text, R.drawable.default_icon, item.has("thumbnail")  ? (String) item.get("thumbnail") : mediaplayer.song_thumbnail));
                     } catch (JSONException e) {
                         Log.e("playlist", e.getMessage() );
                     }
@@ -148,7 +148,7 @@ public class PlaylistActivity extends AppCompatActivity {
                     public void onItemClick(defaultListItem item, int position) {
                         mediaplayer.index = position;
                         adapter.setHighlightIndex(position);
-                        playSong();
+                        mediaplayer.playSong();
                     }
                     @Override
                     public void onItemLongClick(defaultListItem item, int position) {}
@@ -169,24 +169,24 @@ public class PlaylistActivity extends AppCompatActivity {
     };
 
 
-    private void playSong(){
-        try {
-            JSONObject object = mediaplayer.playlist.getJSONObject(mediaplayer.index);
-            mediaplayer.getSongInfo(this, volley, object.getString("folder"), object.getString("file_name"), new Mediaplayer.callback() {
-                @Override
-                public void afterGetInfo(String url) {
-                    mediaplayer.setUrl(url, new Mediaplayer.OnMediaStartListener() {
-                        @Override
-                        public void onMediaStarted(String url) {
-                        }
-                    });
-
-                }
-            });
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    private void playSong(){
+//        try {
+//            JSONObject object = mediaplayer.playlist.getJSONObject(mediaplayer.index);
+//            mediaplayer.getSongInfo(this, volley, object.getString("folder"), object.getString("file_name"), new Mediaplayer.callback() {
+//                @Override
+//                public void afterGetInfo(String url) {
+//                    mediaplayer.setUrl(url, new Mediaplayer.OnMediaStartListener() {
+//                        @Override
+//                        public void onMediaStarted(String url) {
+//                        }
+//                    });
+//
+//                }
+//            });
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
     private void updateBackgroundOnStart(){
         String base64 = prefs.getString("background", "");

@@ -33,6 +33,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.yurixahri.ahrify.adapters.PlaylistListView;
 import com.yurixahri.ahrify.models.playlist;
 import com.yurixahri.ahrify.models.playlistSong;
@@ -99,16 +101,18 @@ public class SongControlPanelActivity extends AppCompatActivity {
             if (state == Player.STATE_READY) {
                 handler.removeCallbacks(updateSeekBar);
                 setupSeekBar(mediaplayer.player);
+                song_title.setText(mediaplayer.song_title);
                 if (mediaplayer.song_cover != null){
-                    song_image.setImageBitmap(mediaplayer.song_cover);
+                    Glide.with(SongControlPanelActivity.this)
+                            .load(mediaplayer.song_cover)
+                            .placeholder(R.drawable.default_icon)
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .into(song_image);
                 }else{
                     song_image.setImageResource(R.drawable.default_icon);
                 }
-                song_title.setText(mediaplayer.song_title);
             }
         }
-
-
     };
 
 
@@ -212,7 +216,7 @@ public class SongControlPanelActivity extends AppCompatActivity {
                         Toast.makeText(context, "Added a new playlist", Toast.LENGTH_SHORT).show();
 
                         Intent update_playlist = new Intent("com.yurixahri.AHRIFY_UPDATE_PLAYLIST");
-                        LocalBroadcastManager.getInstance(this).sendBroadcast(update_playlist);
+                        LocalBroadcastManager.getInstance(context).sendBroadcast(update_playlist);
 
                         add_view_dialog.dismiss();
                     }
@@ -227,13 +231,20 @@ public class SongControlPanelActivity extends AppCompatActivity {
                                 mediaplayer.song_file,
                                 mediaplayer.song_folder,
                                 mediaplayer.song_title,
-                                BitmapCompressor.bitmapToByteArray(mediaplayer.song_cover),
+                                mediaplayer.song_artist,
+                                mediaplayer.song_album,
+                                mediaplayer.song_thumbnail,
+                                mediaplayer.song_cover,
                                 item.id);
 
                         if (playlistSongDAO.insert(playlistSong) == -1){
                             Toast.makeText(context, "Song already exists in playlist", Toast.LENGTH_SHORT).show();
                         }else{
+                            db.updatePlaylistSongs(playlistSongDAO.getAll(item.id));
                             Toast.makeText(context, "Song added to playlist", Toast.LENGTH_SHORT).show();
+
+                            Intent update_playlist_song = new Intent("com.yurixahri.AHRIFY_UPDATE_PLAYLIST");
+                            LocalBroadcastManager.getInstance(context).sendBroadcast(update_playlist_song);
                         }
                     }
                 }
@@ -276,7 +287,12 @@ public class SongControlPanelActivity extends AppCompatActivity {
             updatePlayMode();
 
             if (mediaplayer.player.getCurrentMediaItem() != null) setupSeekBar(mediaplayer.player);
-            if (mediaplayer.song_cover != null) song_image.setImageBitmap(mediaplayer.song_cover);
+            if (mediaplayer.song_cover != null)
+                Glide.with(SongControlPanelActivity.this)
+                        .load(mediaplayer.song_cover)
+                        .placeholder(R.drawable.default_icon)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .into(song_image);
             song_title.setText(mediaplayer.song_title);
 
             if (mediaplayer.isPlaying()){

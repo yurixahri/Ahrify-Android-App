@@ -33,9 +33,9 @@ public class SearchViewPageAdapter extends FragmentStatePagerAdapter {
             case 1:
                 fragment = new ArtistsFragment();
                 break;
-            case 2:
-                fragment =  new SongsFragment();
-                break;
+//            case 2:
+//                fragment =  new SongsFragment();
+//                break;
             default: return null;
         }
 
@@ -44,7 +44,7 @@ public class SearchViewPageAdapter extends FragmentStatePagerAdapter {
     }
     @Override
     public int getCount() {
-        return 3;
+        return 2;
     }
 
     @Override

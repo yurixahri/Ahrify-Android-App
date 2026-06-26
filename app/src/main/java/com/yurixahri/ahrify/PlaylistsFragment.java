@@ -49,7 +49,6 @@ public class PlaylistsFragment extends Fragment {
     ImageButton add_playlist;
     ImageButton back_button;
     ListView list_view;
-
     Mediaplayer mediaplayer;
     MainIterface mainIterface;
 
@@ -150,7 +149,6 @@ public class PlaylistsFragment extends Fragment {
 
         checkVisibility();
 
-
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
                 backgroundUpdateReceiver,
                 new IntentFilter("com.yurixahri.AHRIFY_UPDATE_PLAYLIST")
@@ -203,10 +201,13 @@ public class PlaylistsFragment extends Fragment {
                             for (int i = 0; i < db.playlistSongs.size(); i++){
                                 JSONObject object = new JSONObject();
                                 try {
-                                    object.put("file_name", db.playlistSongs.get(i).file);
-                                    object.put("song_name", db.playlistSongs.get(i).title);
+                                    object.put("id", db.playlistSongs.get(i).file);
                                     object.put("folder", db.playlistSongs.get(i).folder);
-                                    if (db.playlistSongs.get(i).cover != null) object.put("cover", BitmapCompressor.blobToBitmap(db.playlistSongs.get(i).cover));
+                                    object.put("title", db.playlistSongs.get(i).title);
+                                    object.put("artist", db.playlistSongs.get(i).artist);
+                                    object.put("album", db.playlistSongs.get(i).album);
+                                    object.put("thumbnail", db.playlistSongs.get(i).thumbnail);
+                                    object.put("cover", db.playlistSongs.get(i).cover);
                                     playlist.put(object);
                                 } catch (JSONException e) {
                                     throw new RuntimeException(e);

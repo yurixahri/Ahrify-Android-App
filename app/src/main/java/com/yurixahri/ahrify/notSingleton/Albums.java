@@ -21,11 +21,8 @@ public class Albums {
     public JSONArray files = new JSONArray();
     public album current_album;
 
-    final String url_file_list = "https://server.yurixahri.net/~/api/get_file_list?uri=";
-    final String url_file = "https://server.yurixahri.net/";
-    final String url_albums = "https://ahrify.api.yurixahri.net/albums";
-    final String url_album_songs = "https://ahrify.api.yurixahri.net/album_songs?name=";
-
+    final String url_albums = "https://ahrify.yurixahri.net/~/albums";
+    final String url_album_songs = "https://ahrify.yurixahri.net/~/album_songs?name=";
 
     public boolean isLoading = false;
     public boolean isClickable = true;
@@ -79,11 +76,11 @@ public class Albums {
 
     public void getSongs(CustomVolley custom_volley, String album, AlbumListCallback callback){
         String uri = album;
-        try {
-            uri = URLEncoder.encode(album, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            //todo
-        }
+//        try {
+//            uri = URLEncoder.encode(album, "UTF-8");
+//        } catch (UnsupportedEncodingException e) {
+//            //todo
+//        }
 
         JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url_album_songs+uri, null, new Response.Listener<JSONArray>() {
             @Override

@@ -26,14 +26,12 @@ import com.bumptech.glide.request.transition.Transition;
 import com.yurixahri.ahrify.adapters.DefaultListView;
 
 import com.yurixahri.ahrify.interfaces.MainIterface;
-import com.yurixahri.ahrify.models.album;
 import com.yurixahri.ahrify.models.defaultListItem;
 
 import com.yurixahri.ahrify.notSingleton.Mediaplayer;
 import com.yurixahri.ahrify.notSingleton.Songs;
 import com.yurixahri.ahrify.utils.BitmapCompressor;
 import com.yurixahri.ahrify.utils.CustomVolley;
-import com.yurixahri.ahrify.utils.GlideHelper;
 
 
 import org.json.JSONArray;
@@ -41,7 +39,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.concurrent.Future;
 
 public class SongsFragment extends Fragment {
     Songs songs = new Songs();
@@ -122,43 +119,9 @@ public class SongsFragment extends Fragment {
                     for (int i=(songs.currentPage-1)*songs.ITEMS_PER_PAGE; i < songs.songs.length(); i++){
                         try {
                             JSONObject item = songs.songs.getJSONObject(i);
-                            int index = i;
-                            String text = !item.getString("title").isEmpty() ? item.getString("title") : item.getString("file_url");
-                            String cover = !item.getString("cover64").isEmpty() ? item.getString("cover64") :item.getString("cover");
-                            Log.d("item", "name: "+text);
-                            Log.d("item", "cover: "+cover);
-                            if (cover.isEmpty()){
-                                song_list.add(new defaultListItem(text, R.drawable.file_present_aliceblue, null, index));
-                            }else{
-                                if (item.getString("cover").startsWith("http://") || item.getString("cover").startsWith("https://")){
-
-                                    Glide.with(requireContext())
-                                            .asBitmap()
-                                            .load(item.getString("cover"))
-                                            .diskCacheStrategy(DiskCacheStrategy.ALL)
-                                            .into(new CustomTarget<Bitmap>() {
-                                                @Override
-                                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                                    Bitmap resizedBitmap = BitmapCompressor.resizeKeepRatio(resource, 500, 500);
-                                                    Bitmap compressedBitmap = BitmapCompressor.compress(resizedBitmap, BitmapCompressor.Format.JPEG, 50);
-                                                    song_list.add(new defaultListItem(text, R.drawable.file_present_aliceblue, compressedBitmap, index));
-                                                    adapter.notifyDataSetChanged();
-                                                }
-                                                @Override
-                                                public void onLoadCleared(@Nullable Drawable placeholder) {
-                                                }
-                                            });
-                                }else{
-                                    String mBase64string = item.getString("cover").split("[,]")[1];
-                                    byte[] decodedString = Base64.decode(mBase64string, Base64.DEFAULT);
-                                    Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0,decodedString.length);
-                                    Bitmap resizedBitmap = BitmapCompressor.resizeKeepRatio(decodedByte, 500, 500);
-                                    Bitmap compressedBitmap = BitmapCompressor.compress(resizedBitmap, BitmapCompressor.Format.JPEG, 50);
-                                    song_list.add(new defaultListItem(text, R.drawable.file_present_aliceblue, compressedBitmap, index));
-                                    adapter.notifyDataSetChanged();
-                                }
-                            }
-                            //Log.d("item", item.getString("cover"));
+                            String text = item.getString("name");
+                            String thumbnail = item.getString("thumbnail");
+                            song_list.add(new defaultListItem(text, R.drawable.file_present_aliceblue, thumbnail, i));
                         }catch (Exception e){
                             Log.e("item", e.getMessage());
                         }
@@ -181,7 +144,7 @@ public class SongsFragment extends Fragment {
                                             object.put("file_name", songs.songs.getJSONObject(item.index).getString("file_url"));
                                             object.put("song_name", songs.songs.getJSONObject(item.index).getString("title"));
                                             object.put("folder", songs.songs.getJSONObject(item.index).getString("folder_name"));
-                                            object.put("cover", item.cover);
+                                            object.put("thumbnail", item.thumbnail);
 
                                             array.put(object);
                                             mediaplayer.playlist = array;

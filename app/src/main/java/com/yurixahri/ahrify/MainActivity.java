@@ -39,6 +39,8 @@ import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager.widget.ViewPager;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.yurixahri.ahrify.adapters.MainViewPageAdapter;
 import com.yurixahri.ahrify.interfaces.MainIterface;
 import com.yurixahri.ahrify.notSingleton.DBSingleton;
@@ -95,7 +97,12 @@ public class MainActivity extends AppCompatActivity implements MainIterface {
 
         @Override
         public void onPlaybackStateChanged(int state) {
-            if (mediaplayer.song_cover != null) logo_spin.setImageBitmap(mediaplayer.song_cover);
+            if (mediaplayer.song_thumbnail != null)
+                Glide.with(MainActivity.this)
+                        .load(mediaplayer.song_thumbnail)
+                        .placeholder(R.drawable.default_icon)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .into(logo_spin);
             if (state == Player.STATE_READY) {
                 handler.removeCallbacks(updateSeekBar);
                 setupSeekBar(mediaplayer.player);
@@ -159,7 +166,6 @@ public class MainActivity extends AppCompatActivity implements MainIterface {
                         break;
                     case 1:
                         top_nav.selectTabById(R.id.albums, true);
-
                         mode_text.setText("Albums");
                         break;
                     case 2:
@@ -416,8 +422,12 @@ public class MainActivity extends AppCompatActivity implements MainIterface {
     }
 
     private void updateSongInfo(){
-        if (mediaplayer.song_cover != null){
-            logo_spin.setImageBitmap(mediaplayer.song_cover);
+        if (mediaplayer.song_thumbnail != null){
+            Glide.with(MainActivity.this)
+                    .load(mediaplayer.song_thumbnail)
+                    .placeholder(R.drawable.default_icon)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(logo_spin);
         }else{
             logo_spin.setImageResource(R.drawable.default_icon);
         }

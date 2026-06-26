@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.yurixahri.ahrify.R;
 import com.yurixahri.ahrify.models.defaultListItem;
 
@@ -64,20 +66,23 @@ public class DefaultListView extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        convertView = inflater.inflate( layout,null);
-
-        TextView text = convertView.findViewById(R.id.listview_item_text);
-        ImageView image = convertView.findViewById(R.id.listview_item_icon);
-
-        defaultListItem item = list.get(position);
-        text.setText(item.text);
-        if (item.cover != null){
-            image.setImageBitmap(item.cover);
-        }else{
-            image.setImageResource(item.drawable);
+        if (convertView == null) {
+            LayoutInflater inflater = LayoutInflater.from(context);
+            convertView = inflater.inflate(layout, parent, false);
         }
 
+        defaultListItem item = list.get(position);
+        TextView text = convertView.findViewById(R.id.listview_item_text);
+        ImageView img = convertView.findViewById(R.id.listview_item_icon);
+        img.setImageResource(item.drawable);
+        text.setText(item.text);
+
+        if (!item.thumbnail.isEmpty())
+            Glide.with(context)
+                    .load(item.thumbnail)
+                    .placeholder(item.drawable)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(img);
 
         convertView.setOnClickListener(v -> {
             if (listener != null) {

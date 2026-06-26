@@ -8,7 +8,7 @@ import androidx.annotation.Nullable;
 
 public class DBHelper extends SQLiteOpenHelper {
     private static final String DB_Name = "Ahrify";
-    private static final int DB_Version = 3;
+    private static final int DB_Version = 4;
     public DBHelper(@Nullable Context context) {
         super(context, DB_Name, null, DB_Version);
     }
@@ -22,7 +22,10 @@ public class DBHelper extends SQLiteOpenHelper {
                 "file text not null,"+
                 "folder text not null,"+
                 "title text not null,"+
-                "cover blob,"+
+                "artist text not null,"+
+                "album text not null,"+
+                "thumbnail text,"+
+                "cover text,"+
                 "playlist_id INTEGER not null,"+
                 "PRIMARY KEY (file, folder, playlist_id),"+
                 "FOREIGN KEY (playlist_id) REFERENCES playlist(id) ON DELETE CASCADE)";

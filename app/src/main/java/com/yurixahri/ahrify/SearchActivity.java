@@ -61,8 +61,8 @@ public class SearchActivity extends AppCompatActivity implements MainIterface {
                 , FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, search);
         search_view_pager.setAdapter(searchViewPageAdapter);
         search_view_pager.setCurrentItem(0);
-        search_view_pager.setOffscreenPageLimit(2);
-
+        search_view_pager.setOffscreenPageLimit(1);
+        mode_text.setText("Albums");
         search_view_pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
@@ -79,10 +79,10 @@ public class SearchActivity extends AppCompatActivity implements MainIterface {
                         top_nav.selectTabById(R.id.artists, true);
                         mode_text.setText("Artists");
                         break;
-                    case 2:
-                        top_nav.selectTabById(R.id.songs, true);
-                        mode_text.setText("Songs");
-                        break;
+//                    case 2:
+//                        top_nav.selectTabById(R.id.songs, true);
+//                        mode_text.setText("Songs");
+//                        break;
                 }
             }
 
@@ -103,10 +103,10 @@ public class SearchActivity extends AppCompatActivity implements MainIterface {
                         search_view_pager.setCurrentItem(1);
                         mode_text.setText("Artists");
                         break;
-                    case 2:
-                        search_view_pager.setCurrentItem(2);
-                        mode_text.setText("Songs");
-                        break;
+//                    case 2:
+//                        search_view_pager.setCurrentItem(2);
+//                        mode_text.setText("Songs");
+//                        break;
                 }
             }
             @Override

@@ -20,12 +20,9 @@ public class Artists {
     public JSONArray artists = new JSONArray();
     public JSONArray files = new JSONArray();
 
-    final String url_file = "https://server.yurixahri.net/";
-    final String url_artists = "https://ahrify.api.yurixahri.net/artists";
-    final String url_artist_songs = "https://ahrify.api.yurixahri.net/artist_songs?name=";
-
+    final String url_artists = "https://ahrify.yurixahri.net/~/artists";
+    final String url_artist_songs = "https://ahrify.yurixahri.net/~/artist_songs?name=";
     public artist current_artist;
-
 
     public boolean isLoading = false;
     public int currentPage = 1;
@@ -76,11 +73,11 @@ public class Artists {
 
     public void getSongs(CustomVolley custom_volley, String artist, ArtistListCallback callback){
         String uri = artist;
-        try {
-            uri = URLEncoder.encode(artist, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            //todo
-        }
+//        try {
+//            uri = URLEncoder.encode(artist, "UTF-8");
+//        } catch (UnsupportedEncodingException e) {
+//            //todo
+//        }
         JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url_artist_songs +uri, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {

@@ -17,22 +17,22 @@ import android.os.SystemClock;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Base64;
 import android.util.Log;
-import android.widget.RemoteViews;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-
+import androidx.core.app.NotificationManagerCompat;
 
 
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.yurixahri.ahrify.MainActivity;
 import com.yurixahri.ahrify.R;
 import com.yurixahri.ahrify.services.NotificationActionReceiver;
 import com.yurixahri.ahrify.utils.BitmapCompressor;
@@ -54,14 +54,17 @@ import java.util.Random;
 public class Mediaplayer extends Service {
     public JSONArray playlist = new JSONArray();
     public String playlist_title;
-    public Bitmap cover;
 
+
+    public final String url_thumbnail = "https://ahrify.yurixahri.net/~/files/thumbnails/";
+    public final String url_cover = "https://ahrify.yurixahri.net/~/files/covers/";
     public String song_title = "";
     public String song_artist = "";
     public String song_album = "";
     public String song_file = "";
     public String song_folder = "";
-    public Bitmap song_cover;
+    public String song_thumbnail;
+    public String song_cover;
 
     public boolean isLoading = false;
 
@@ -71,8 +74,8 @@ public class Mediaplayer extends Service {
     public byte play_mode = 0;
 
     public short size;
-    private String base_url = "https://server.yurixahri.net/";
-    private String song_info_url = "https://ahrify.api.yurixahri.net/song_info";
+    private String base_url = "https://ahrify.yurixahri.net/~/files/";
+    private String song_info_url = "https://ahrify.yurixahri.net/~/song_info";
 
     private long playbackStartTime = 0;
     private long positionAtStart = 0;
@@ -94,7 +97,7 @@ public class Mediaplayer extends Service {
     private final IBinder binder = new LocalBinder();
 
     public interface callback {
-        void afterGetInfo(String url);
+        void afterGetInfo(String url, short index);
     }
 
     public class LocalBinder extends Binder {
@@ -262,8 +265,8 @@ public class Mediaplayer extends Service {
                 .setSmallIcon(R.drawable.music_note_aliceblue)
                 .setContentTitle(song_title)
                 .setContentText(song_artist)
-                .setLargeIcon(song_cover != null ? song_cover :
-                        BitmapFactory.decodeResource(getResources(), R.drawable.default_icon))
+                .setContentIntent(getMainActivityPendingIntent())
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.default_icon))
                 .addAction(R.drawable.skip_previous, "Previous", getPendingIntent(ACTION_PREV))
                 .addAction(playPauseIcon, "Play/Pause", getPendingIntent(ACTION_PLAY_PAUSE))
                 .addAction(R.drawable.skip_next, "Next", getPendingIntent(ACTION_NEXT))
@@ -274,8 +277,31 @@ public class Mediaplayer extends Service {
                 .setOngoing(player.isPlaying())
                 .setOnlyAlertOnce(true);
 
+        if (song_cover != null && !song_cover.isEmpty()) {
+            Glide.with(getApplicationContext())
+                    .asBitmap()
+                    .load(song_thumbnail) // Your image URL string
+                    .into(new CustomTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            // Update the builder with the newly downloaded bitmap
+                            builder.setLargeIcon(resource);
+                            // Push the update out to the system bar dynamically
+                            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
+                            // Replace NOTIFICATION_ID with your actual integer constant (e.g., 1)
+                            notificationManager.notify(NOTIFICATION_ID, builder.build());
+                        }
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
+                            // No action required here
+                        }
+                    });
+        }
+
         return builder.build();
     }
+
+
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -288,66 +314,28 @@ public class Mediaplayer extends Service {
         }
     }
 
-    public void getSongInfo(Context context, CustomVolley volley, String folder, String file, callback callback) {
-        String encoded_folder = "";
-        String encoded_file = "";
-        try {
-            encoded_folder = URLEncoder.encode(folder, "UTF-8");
-            encoded_file = URLEncoder.encode(file, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            //todo
-        }
+    public void getSongInfo(Context context, CustomVolley volley, short index, String folder, String file, callback callback) {
+//        String encoded_folder = "";
+//        String encoded_file = "";
+//        try {
+//            encoded_folder = URLEncoder.encode(folder, "UTF-8");
+//            encoded_file = URLEncoder.encode(file, "UTF-8");
+//        } catch (UnsupportedEncodingException e) {
+//            //todo
+//        }
 
         String url = folder + "/" + file;
-        String param = "?folder=" + encoded_folder + "&file=" + encoded_file;
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, song_info_url + param, null, new Response.Listener<JSONObject>() {
+        String param = "?folder=" + folder + "&id=" + file;
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, song_info_url + param, null, new Response.Listener<JSONArray>() {
             @Override
-            public void onResponse(JSONObject response) {
+            public void onResponse(JSONArray response) {
                 try {
-                    song_title = (response.getString("title").isEmpty()) ? file : response.getString("title");
-                    song_album = (response.getString("album").isEmpty()) ? "" : response.getString("album");
-                    song_artist = (response.getString("artist").isEmpty()) ? "" : response.getString("artist");
-                    song_file = file;
-                    song_folder = folder;
-                    if (!response.getString("cover").isEmpty()) {
-                        if (response.getString("cover").startsWith("http://") || response.getString("cover").startsWith("https://")) {
-                            Glide.with(context)
-                                    .asBitmap()
-                                    .load(response.getString("cover"))
-                                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                                    .into(new CustomTarget<Bitmap>() {
-                                        @Override
-                                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                            Bitmap resizedBitmap = BitmapCompressor.resizeKeepRatio(resource, 1000, 1000);
-                                            Bitmap compressedBitmap = BitmapCompressor.compress(resizedBitmap, BitmapCompressor.Format.JPEG, 70);
-                                            song_cover = compressedBitmap;
-                                            callback.afterGetInfo(url);
-                                        }
-
-                                        @Override
-                                        public void onLoadCleared(@Nullable Drawable placeholder) {
-                                        }
-                                    });
-                        } else {
-                            String mBase64string = response.getString("cover").split("[,]")[1];
-                            byte[] decodedString = Base64.decode(mBase64string, Base64.DEFAULT);
-                            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                            Bitmap resizedBitmap = BitmapCompressor.resizeKeepRatio(decodedByte, 1000, 1000);
-                            Bitmap compressedBitmap = BitmapCompressor.compress(resizedBitmap, BitmapCompressor.Format.JPEG, 70);
-                            song_cover = compressedBitmap;
-                            callback.afterGetInfo(url);
-                        }
-
-                    } else {
-                        song_cover = null;
-                        callback.afterGetInfo(url);
+                    for (int i = 0; i < response.length(); i++) {
+                        playlist.put(index, response.getJSONObject(i));
                     }
                 } catch (JSONException e) {
-                    callback.afterGetInfo(url);
-                    throw new RuntimeException(e);
-
                 }
+                callback.afterGetInfo(url, index);
             }
         }, error -> {
             if (error.networkResponse != null) {
@@ -362,8 +350,9 @@ public class Mediaplayer extends Service {
             song_artist = "";
             song_file = file;
             song_folder = folder;
+            song_thumbnail = null;
             song_cover = null;
-            callback.afterGetInfo(url);
+            callback.afterGetInfo(url, index);
         });
 
         volley.getRequestQueue().add(request);
@@ -372,17 +361,21 @@ public class Mediaplayer extends Service {
     public void playSong() {
         try {
             JSONObject object = playlist.getJSONObject(index);
-            getSongInfo(this, volley, object.getString("folder"), object.getString("file_name"), new Mediaplayer.callback() {
-                @Override
-                public void afterGetInfo(String url) {
-                    setUrl(url, new Mediaplayer.OnMediaStartListener() {
-                        @Override
-                        public void onMediaStarted(String url) {
-                            isLoading = false;
-                            startForeground(NOTIFICATION_ID, buildNotification());
-                        }
-                    });
+            song_title = object.getString("title");
+            song_album = object.getString("album");
+            song_artist = object.getString("artist");
+            song_file = object.getString("id");
+            song_folder = object.getString("folder");
+            song_thumbnail = object.getString("thumbnail").startsWith("https") ||  object.getString("thumbnail").startsWith("http") ? object.getString("thumbnail") : url_thumbnail + object.getString("thumbnail");
+            song_cover = object.getString("cover").startsWith("https") ||  object.getString("cover").startsWith("http") ? object.getString("cover") : url_cover + object.getString("cover");
 
+            String path =  song_folder+"/"+song_file;
+
+            setUrl(path, new Mediaplayer.OnMediaStartListener() {
+                @Override
+                public void onMediaStarted(String url) {
+                    isLoading = false;
+                    startForeground(NOTIFICATION_ID, buildNotification());
                 }
             });
         } catch (Exception e) {
@@ -415,6 +408,17 @@ public class Mediaplayer extends Service {
         Intent intent = new Intent(this, NotificationActionReceiver.class);
         intent.setAction(action);
         return PendingIntent.getBroadcast(this, action.hashCode(), intent, PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    private PendingIntent getMainActivityPendingIntent() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        return PendingIntent.getActivity(
+                this,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
     }
 
 }

@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.yurixahri.ahrify.R;
 import com.yurixahri.ahrify.models.artist;
 import com.google.android.material.imageview.ShapeableImageView;
@@ -54,18 +56,23 @@ public class ArtistsView extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         convertView = inflater.inflate( layout,null);
+
+        artist item = list.get(position);
         TextView text;
         ShapeableImageView img;
 
-        artist item = list.get(position);
         text= convertView.findViewById(R.id.listview_item_text);
         img = convertView.findViewById(R.id.listview_item_icon);
 
-
-
-
-        text.setText(item.text);
         img.setImageResource(item.drawable);
+        text.setText(item.text);
+
+        if (!item.thumbnail.isEmpty())
+            Glide.with(context)
+                    .load(item.thumbnail)
+                    .placeholder(item.drawable)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(img);
 
 
         convertView.setOnClickListener(v -> {

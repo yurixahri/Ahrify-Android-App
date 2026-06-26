@@ -84,7 +84,6 @@ public class ArtistsFragment extends Fragment {
 
         view.setAdapter(adapter);
 
-
         view.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {}
@@ -104,7 +103,7 @@ public class ArtistsFragment extends Fragment {
     private void loadMoreAlbums(ArtistsView adapter, View v) {
 
         spinner.setVisibility(View.VISIBLE);
-
+        artists.isLoading = true;
 
         artists.getArtists(volley, new Artists.ArtistListCallback() {
             @Override
@@ -114,8 +113,9 @@ public class ArtistsFragment extends Fragment {
                         try {
                             JSONObject item = artists.artists.getJSONObject(i);
                             String text = item.getString("name");
-                            artist_model_list.add(new artist(R.drawable.person_aliceblue, text, false));
-                            //Log.d("item", item.getString("cover"));
+                            String thumbnail = item.getString("thumbnail");
+                            artist_model_list.add(new artist(R.drawable.person_aliceblue, thumbnail, text, false));
+                            //Log.d("item", item.getString("thumbnail"));
                         }catch (Exception e){
                             Log.e("item", e.getMessage());
                         }
@@ -147,7 +147,7 @@ public class ArtistsFragment extends Fragment {
         });
     }
 
-    private void getSongs(artist artist, View v){
+    private void getSongs(artist instance, View v){
         artist_song_model_list.clear();
 
         ListView list_view = new ListView(v.getContext());
@@ -157,14 +157,11 @@ public class ArtistsFragment extends Fragment {
         ));
 
         TextView header = new TextView(v.getContext());
-        header.setText(artist.text); // Or "Songs", or any title
+        header.setText(instance.text); // Or "Songs", or any title
         header.setTextSize(18f);
         header.setPadding(20, 20, 10, 20);
         header.setTextColor(getResources().getColor(R. color. aliceblue));
         list_view.addHeaderView(header);
-
-
-
 
         FrameLayout container = v.findViewById(R.id.view_container);
 
@@ -178,7 +175,7 @@ public class ArtistsFragment extends Fragment {
                     .start();
         }
 
-        artists.getSongs(volley, artist.text, new Artists.ArtistListCallback() {
+        artists.getSongs(volley, instance.text, new Artists.ArtistListCallback() {
             @Override
             public void onListLoaded() {}
 
@@ -187,9 +184,8 @@ public class ArtistsFragment extends Fragment {
                 for (short i = 0; i < artists.files.length(); i++){
                     try {
                         JSONObject item = artists.files.getJSONObject(i);
-                        Log.d("song", item.getString("file_name"));
-                        String text = (item.getString("song_name").isEmpty()) ? item.getString("file_name") : item.getString("song_name");
-                        artist_song_model_list.add(new artist(R.drawable.music_file, text, true));
+                        String text = (item.getString("title").isEmpty()) ? item.getString("id") : item.getString("title");
+                        artist_song_model_list.add(new artist(R.drawable.music_file, item.getString("thumbnail") ,text, true));
 
 
                     } catch (JSONException e) {
@@ -207,30 +203,14 @@ public class ArtistsFragment extends Fragment {
                         if (mainIterface.getMediaService() != null){
                             mediaplayer = mainIterface.getMediaService();
                             if (!mediaplayer.isLoading){
-                                try {
-                                    mediaplayer.isLoading = true;
-                                    JSONObject object = artists.files.getJSONObject(position);
-                                    mediaplayer.playlist = artists.files;
-                                    mediaplayer.index = position;
-                                    mediaplayer.cover = null;
-                                    mediaplayer.playlist_title = artists.current_artist.text;
-                                    mediaplayer.getSongInfo(getContext(), volley, object.getString("folder"), object.getString("file_name"), new Mediaplayer.callback() {
-                                        @Override
-                                        public void afterGetInfo(String url) {
-                                            mediaplayer.setUrl(url, new Mediaplayer.OnMediaStartListener() {
-                                                @Override
-                                                public void onMediaStarted(String url) {
-                                                    mediaplayer.isLoading = false;
-                                                    mainIterface.goToSongControlActivity();
-                                                }
-                                            });
+                                mediaplayer.isLoading = true;
+                                mediaplayer.playlist = artists.files;
+                                mediaplayer.index = position;
+                                mediaplayer.playlist_title = artists.current_artist.text;
+                                mediaplayer.isLoading = false;
 
-                                        }
-                                    });
-                                } catch (JSONException e) {
-                                    mediaplayer.isLoading = false;
-                                    throw new RuntimeException(e);
-                                }
+                                mediaplayer.playSong();
+                                mainIterface.goToSongControlActivity();
                             }
                         }
                     }

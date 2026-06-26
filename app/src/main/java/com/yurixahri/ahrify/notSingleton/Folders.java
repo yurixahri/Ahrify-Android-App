@@ -24,7 +24,7 @@ public class Folders {
     public ArrayList<String> current_path = new ArrayList<String>();
     public ArrayList<String> previous_path = new ArrayList<String>();
 
-    final String url = "https://server.yurixahri.net/~/api/get_file_list?uri=";
+    final String url = "https://ahrify.yurixahri.net/~/list_files/";
 
     public boolean isClickable = true;
 
@@ -47,36 +47,40 @@ public class Folders {
         files.clear();
         String uri = String.join("/", current_path);
 
-        try {
-            uri = URLEncoder.encode(uri, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            //todo
-        }
+//        try {
+//            uri = URLEncoder.encode(uri, "UTF-8");
+//        } catch (UnsupportedEncodingException e) {
+//            //todo
+//        }
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url+uri, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                JSONArray list = new JSONArray();
+                JSONArray res_files = new JSONArray();
+                JSONArray res_folders = new JSONArray();
+
                 try {
-                    list = response.getJSONArray("list");
-                }catch (Exception e){
+                    res_files = response.getJSONArray("files");
+                    res_folders = response.getJSONArray("folders");
+                } catch (Exception e) {
 
                 }
 
-                for (short i = 0; i < list.length(); i++){
-                    try {
-                        JSONObject object = list.getJSONObject(i);
-                        if (object.getString("n").contains("/")){
-                            folders.add(object.getString("n").replace("/", ""));
-                        }else{
-                            String[] temp = object.getString("n").split("[.]");
-                            if (temp[temp.length - 1].matches("mp3|m4a|wav|flac|ogg|aiff")){
-                                files.add(object.getString("n"));
-                            }
+                for (short i = 0; i < res_folders.length(); ++i){
+                    try{
+                        JSONObject object = res_folders.getJSONObject(i);
+                        folders.add(object.getString("n"));
+                    } catch (Exception e) {}
+                }
+
+                for (short i = 0; i < res_files.length(); ++i){
+                    try{
+                        JSONObject object = res_files.getJSONObject(i);
+                        String[] temp = object.getString("n").split("[.]");
+                        if (temp[temp.length - 1].matches("mp3|m4a|wav|flac|ogg|aiff")){
+                            files.add(object.getString("n"));
                         }
-                    }catch (Exception e){
-                        Log.e("folders", e.getMessage());
-                    }
+                    } catch (Exception e) {}
                 }
 
                 NaturalOrderComparator comparator = new NaturalOrderComparator();
@@ -103,7 +107,6 @@ public class Folders {
         for (String file: files){
             Log.d("files", file);
         }
-
     }
 
 

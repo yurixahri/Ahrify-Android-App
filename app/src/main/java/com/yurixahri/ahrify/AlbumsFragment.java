@@ -1,17 +1,13 @@
 package com.yurixahri.ahrify;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
+
 import android.os.Bundle;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
-
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageButton;
@@ -23,27 +19,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.yurixahri.ahrify.adapters.AlbumsView;
-
 import com.yurixahri.ahrify.interfaces.MainIterface;
 import com.yurixahri.ahrify.models.album;
-
 import com.yurixahri.ahrify.notSingleton.Albums;
-
 import com.yurixahri.ahrify.notSingleton.Mediaplayer;
-import com.yurixahri.ahrify.utils.BitmapCompressor;
 import com.yurixahri.ahrify.utils.CustomVolley;
-import com.yurixahri.ahrify.utils.GlideHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.concurrent.Future;
 
 public class AlbumsFragment extends Fragment {
     Albums albums = new Albums();
@@ -74,8 +60,6 @@ public class AlbumsFragment extends Fragment {
             mainIterface = (MainIterface) requireContext();
         }
 
-
-
         setAdapter(v);
 
         back_button = v.findViewById(R.id.back_button);
@@ -104,6 +88,7 @@ public class AlbumsFragment extends Fragment {
         view.setVerticalSpacing(24);
 
         view.setNumColumns(3);
+//        view.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
         //view.setColumnWidth(view.getWidth()/4);
 
         FrameLayout container = v.findViewById(R.id.view_container);
@@ -111,7 +96,6 @@ public class AlbumsFragment extends Fragment {
         AlbumsView adapter = new AlbumsView(getContext(), R.layout.album_item, album_model_list);
 
         view.setAdapter(adapter);
-
 
         view.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
@@ -127,11 +111,7 @@ public class AlbumsFragment extends Fragment {
             }
         });
         container.addView(view);
-
-
         //loadMoreAlbums(adapter);
-
-
     }
 
     private void loadMoreAlbums(AlbumsView adapter, View v) {
@@ -147,40 +127,10 @@ public class AlbumsFragment extends Fragment {
                         try {
                             JSONObject item = albums.albums.getJSONObject(i);
                             String text = item.getString("name");
-                            if (item.getString("cover").isEmpty()){
-                                album_model_list.add(new album(R.drawable.default_icon, null, text,false));
-                            }else{
-                                if (item.getString("cover").startsWith("http://") || item.getString("cover").startsWith("https://")){
-                                    Glide.with(requireContext())
-                                            .asBitmap()
-                                            .load(item.getString("cover"))
-                                            .diskCacheStrategy(DiskCacheStrategy.ALL)
-                                            .into(new CustomTarget<Bitmap>() {
-                                                @Override
-                                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                                    Bitmap resizedBitmap = BitmapCompressor.resizeKeepRatio(resource, 500, 500);
-                                                    Bitmap compressedBitmap = BitmapCompressor.compress(resizedBitmap, BitmapCompressor.Format.JPEG, 50);
-                                                    album_model_list.add(new album(R.drawable.default_icon, compressedBitmap, text, false));
-                                                    adapter.notifyDataSetChanged();
-                                                }
+                            String thumbnail = item.getString("thumbnail");
+                            album_model_list.add(new album(R.drawable.default_icon, thumbnail, text,false));
 
-                                                @Override
-                                                public void onLoadCleared(@Nullable Drawable placeholder) {
-                                                }
-                                            });
-
-                                }else{
-                                    String mBase64string = item.getString("cover").split("[,]")[1];
-                                    byte[] decodedString = Base64.decode(mBase64string, Base64.DEFAULT);
-                                    Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0,decodedString.length);
-                                    Bitmap resizedBitmap = BitmapCompressor.resizeKeepRatio(decodedByte, 500, 500);
-                                    Bitmap compressedBitmap = BitmapCompressor.compress(resizedBitmap, BitmapCompressor.Format.JPEG, 50);
-                                    album_model_list.add(new album(R.drawable.default_icon, compressedBitmap, text, false));
-
-                                }
-                            }
-
-                            //Log.d("item", item.getString("cover"));
+                            //Log.d("item", item.getString("thumbnail"));
                         }catch (Exception e){
                             Log.e("item", e.getMessage());
                         }
@@ -212,8 +162,7 @@ public class AlbumsFragment extends Fragment {
         });
     }
 
-
-    private void getSongs(album folder, View v){
+    private void getSongs(album instance, View v){
         album_song_model_list.clear();
 
         ListView list_view = new ListView(v.getContext());
@@ -223,14 +172,11 @@ public class AlbumsFragment extends Fragment {
         ));
 
         TextView header = new TextView(v.getContext());
-        header.setText(folder.text); // Or "Songs", or any title
+        header.setText(instance.name); // Or "Songs", or any title
         header.setTextSize(18f);
         header.setPadding(20, 20, 10, 20);
         header.setTextColor(getResources().getColor(R. color. aliceblue));
         list_view.addHeaderView(header);
-
-
-
 
         FrameLayout container = requireView().findViewById(R.id.view_container);
 
@@ -244,7 +190,7 @@ public class AlbumsFragment extends Fragment {
                     .start();
         }
 
-        albums.getSongs(volley, folder.text, new Albums.AlbumListCallback() {
+        albums.getSongs(volley, instance.name, new Albums.AlbumListCallback() {
             @Override
             public void onListLoaded() {}
 
@@ -253,15 +199,9 @@ public class AlbumsFragment extends Fragment {
                 for (short i = 0; i < albums.files.length(); i++){
                     try {
                         JSONObject item = albums.files.getJSONObject(i);
-                        Log.d("song", item.getString("file_name"));
-                        String text = (item.getString("song_name").isEmpty()) ? item.getString("file_name") : item.getString("song_name");
-
-                        if (folder.cover != null){
-                            album_song_model_list.add(new album(R.drawable.default_icon, folder.cover, text, true));
-                        }else{
-                            album_song_model_list.add(new album(R.drawable.default_icon, null, text, true));
-                        }
-
+                        Log.d("song", item.getString("title"));
+                        String text = (item.getString("title").isEmpty()) ? item.getString("id") : item.getString("title");
+                        album_song_model_list.add(new album(R.drawable.default_icon, item.getString("thumbnail"), text, true));
 
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
@@ -279,30 +219,14 @@ public class AlbumsFragment extends Fragment {
                         if (mainIterface.getMediaService() != null){
                             mediaplayer = mainIterface.getMediaService();
                             if (!mediaplayer.isLoading){
-                                try {
-                                    mediaplayer.isLoading = true;
-                                    JSONObject object = albums.files.getJSONObject(position);
-                                    mediaplayer.playlist = albums.files;
-                                    mediaplayer.cover = item.cover;
-                                    mediaplayer.index = position;
-                                    mediaplayer.playlist_title = albums.current_album.text;
-                                    mediaplayer.getSongInfo(getContext(), volley, object.getString("folder"), object.getString("file_name"), new Mediaplayer.callback() {
-                                        @Override
-                                        public void afterGetInfo(String url) {
-                                            mediaplayer.setUrl(url, new Mediaplayer.OnMediaStartListener() {
-                                                @Override
-                                                public void onMediaStarted(String url) {
-                                                    mediaplayer.isLoading = false;
-                                                    mainIterface.goToSongControlActivity();
-                                                }
-                                            });
-                                        }
-                                    });
-                                    Log.d("play", "onSongsLoaded: ");
-                                } catch (JSONException e) {
-                                    mediaplayer.isLoading = false;
-                                    throw new RuntimeException(e);
-                                }
+                                mediaplayer.isLoading = true;
+                                mediaplayer.playlist = albums.files;
+                                mediaplayer.index = position;
+                                mediaplayer.playlist_title = albums.current_album.name;
+                                mediaplayer.isLoading = false;
+
+                                mediaplayer.playSong();
+                                mainIterface.goToSongControlActivity();
                             }
                         }
                     }
@@ -348,6 +272,4 @@ public class AlbumsFragment extends Fragment {
                     .setDuration(200).start();
         }
     }
-
-
 }

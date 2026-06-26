@@ -128,44 +128,39 @@ public class FoldersFragment extends Fragment {
                         folders.current_path.add(item.text);
                         openFolder(v);
                     } else if (!item.is_folder){
-
-                            JSONArray playlist = new JSONArray();
+                            if (mainIterface.getMediaService() != null) {
+                                mediaplayer = mainIterface.getMediaService();
+                                mediaplayer.playlist = new JSONArray();
+                            }
+                            if (mediaplayer.isLoading) return;
+                            for (short i = 0; i < folders.files.size(); i++){
+                                mediaplayer.playlist.put(new JSONObject());
+                            }
                             for (short i = 0; i < folders.files.size(); i++){
                                 try {
-                                    JSONObject song = new JSONObject();
-                                    song.put("folder", String.join("/", folders.current_path));
-                                    song.put("file_name", folders.files.get(i));
-                                    playlist.put(song);
+                                    mediaplayer.getSongInfo(getContext(), volley, i, String.join("/", folders.current_path), folders.files.get(i), new Mediaplayer.callback() {
+                                        @Override
+                                        public void afterGetInfo(String url, short index) {
+                                            if (index == position - folders.folders.size())
+                                                mediaplayer.setUrl(url, new Mediaplayer.OnMediaStartListener() {
+                                                    @Override
+                                                    public void onMediaStarted(String url) {
+                                                        mediaplayer.isLoading = true;
+                                                        mediaplayer.index = index;
+                                                        mediaplayer.playlist_title = folders.current_path.get(folders.current_path.size() - 1);
+                                                        mediaplayer.isLoading = false;
+
+                                                        mediaplayer.playSong();
+                                                        mainIterface.goToSongControlActivity();
+
+                                                    }
+                                                });
+                                        }
+                                    });
                                 } catch (Exception e) {
                                     throw new RuntimeException(e);
                                 }
                             }
-
-
-                            if (mainIterface.getMediaService() != null){
-                                mediaplayer = mainIterface.getMediaService();
-                                if (!mediaplayer.isLoading){
-                                    mediaplayer.isLoading = true;
-                                    mediaplayer.playlist = playlist;
-                                    mediaplayer.cover = null;
-                                    mediaplayer.index = position - folders.folders.size();
-                                    mediaplayer.playlist_title = folders.current_path.get(folders.current_path.size() - 1);
-                                    mediaplayer.getSongInfo(getContext(), volley, String.join("/", folders.current_path), item.text, new Mediaplayer.callback() {
-                                        @Override
-                                        public void afterGetInfo(String url) {
-                                            mediaplayer.setUrl(url, new Mediaplayer.OnMediaStartListener() {
-                                                @Override
-                                                public void onMediaStarted(String url) {
-                                                    mediaplayer.isLoading = false;
-                                                    mainIterface.goToSongControlActivity();
-                                                }
-                                            });
-                                        }
-                                    });
-                                }
-
-                            }
-
                     }
                 });
 

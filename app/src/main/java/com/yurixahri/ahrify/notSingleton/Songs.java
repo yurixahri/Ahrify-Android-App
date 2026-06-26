@@ -15,7 +15,6 @@ import org.json.JSONException;
 public class Songs {
     public JSONArray songs = new JSONArray();
 
-    final String url_file = "https://server.yurixahri.net/";
     final String url_songs = "https://ahrify.api.yurixahri.net/songs";
 
 
